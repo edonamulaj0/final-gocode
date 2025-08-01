@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  class     String   // B2, B3, M1, M2
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  enrollments CourseEnrollment[]
+  submissions PracticeSubmission[]
+  progress    UserProgress[]
+
+  @@map("users")
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  duration    String
+  lessons     Int
+  difficulty  String
+  order       Int      // For sequential unlocking
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  enrollments CourseEnrollment[]
+  lessons_rel Lesson[]
+  practices   PracticeQuest[]
+  progress    UserProgress[]
+
+  @@map("courses")
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   // JSON or markdown content
+  order       Int
+  courseId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("lessons")
+}
+
+model CourseEnrollment {
+  id           String   @id @default(cuid())
+  userId       String
+  courseId     String
+  enrolledAt   DateTime @default(now())
+  completedAt  DateTime?
+  isCompleted  Boolean  @default(false)
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("course_enrollments")
+}
+
+model UserProgress {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  progress   Int      @default(0) // 0-100
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("user_progress")
+}
+
+model PracticeQuest {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  difficulty  String   // easy, medium, hard
+  courseId    String
+  testCases   Json     // Array of test cases
+  solution    String   // Expected solution
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  course      Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  submissions PracticeSubmission[]
+
+  @@map("practice_quests")
+}
+
+model PracticeSubmission {
+  id          String   @id @default(cuid())
+  userId      String
+  questId     String
+  code        String
+  isCorrect   Boolean  @default(false)
+  score       Int      @default(0)
+  submittedAt DateTime @default(now())
+
+  // Relations
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quest PracticeQuest @relation(fields: [questId], references: [id], onDelete: Cascade)
+
+  @@map("practice_submissions")
+}
