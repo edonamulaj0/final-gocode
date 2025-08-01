@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Home, BookOpen, ArrowLeft, CheckCircle, Lock } from "lucide-react";
+import { BookOpen, ArrowLeft, CheckCircle, Lock } from "lucide-react";
 
 interface Lesson {
   id: string;
@@ -138,23 +138,23 @@ export default function CourseDetail({
     <div className="min-h-screen bg-gray-50 flex">
       {/* Course Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full bg-slate-900 text-white shadow-lg border-r transition-all duration-300 z-40 ${
-          sidebarOpen ? "w-80" : "w-16"
-        }`}
+        className={`fixed left-0 top-0 h-full bg-slate-900 text-white shadow-lg transition-all duration-300 z-40 ${
+          sidebarOpen ? "w-64" : "w-16"
+        } lg:block ${sidebarOpen ? "" : "hidden lg:block"}`}
       >
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-slate-700">
-          <div className="flex items-center justify-between">
+        <div className="p-6">
+          <div
+            className={`flex items-center ${
+              sidebarOpen ? "justify-between" : "justify-center"
+            }`}
+          >
             {sidebarOpen && (
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl">{course.icon}</span>
-                <div>
-                  <h2 className="font-semibold text-white truncate">
-                    {course.name}
-                  </h2>
-                  <p className="text-sm text-slate-300">Course Overview</p>
-                </div>
-              </div>
+              <h1 className="text-2xl font-bold text-blue-400 mb-0">
+                <Link href="/" className="hover:text-blue-300">
+                  GoCode
+                </Link>
+              </h1>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -167,24 +167,22 @@ export default function CourseDetail({
               )}
             </button>
           </div>
+          {sidebarOpen && (
+            <div className="flex items-center space-x-2 mt-8">
+              <span className="text-xl">{course.icon}</span>
+              <div>
+                <h2 className="font-semibold text-white truncate text-sm">
+                  {course.name}
+                </h2>
+                <p className="text-xs text-slate-300">Course Overview</p>
+              </div>
+            </div>
+          )}
         </div>
-
-        {/* Navigation Links */}
-        {sidebarOpen && (
-          <div className="p-4 border-b border-slate-700">
-            <Link
-              href="/"
-              className="flex items-center space-x-2 text-slate-300 hover:text-blue-400 mb-2"
-            >
-              <Home className="w-4 h-4" />
-              <span>Home</span>
-            </Link>
-          </div>
-        )}
 
         {/* Course Progress */}
         {sidebarOpen && (
-          <div className="p-4 border-b border-slate-700">
+          <div className="px-6 pb-4">
             <h3 className="font-semibold text-white mb-2">Course Progress</h3>
             <div className="mb-2">
               <div className="flex justify-between text-sm text-slate-300 mb-1">
@@ -206,7 +204,7 @@ export default function CourseDetail({
         {/* Lessons List */}
         <div className="flex-1 overflow-y-auto">
           {sidebarOpen && (
-            <div className="p-4">
+            <div className="px-6 pb-6">
               <h3 className="font-semibold text-white mb-4">Lessons</h3>
               <div className="space-y-2">
                 {course.lessons.map((lesson, index) => {
@@ -270,7 +268,7 @@ export default function CourseDetail({
           )}
 
           {!sidebarOpen && (
-            <div className="p-2">
+            <div className="flex flex-col items-center pt-4">
               {course.lessons.map((lesson, index) => {
                 const isCompleted = lesson.isCompleted;
                 const isAccessible =
@@ -317,9 +315,19 @@ export default function CourseDetail({
       {/* Main Content */}
       <div
         className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-80" : "ml-16"
-        }`}
+          sidebarOpen ? "lg:ml-64" : "lg:ml-16"
+        } ml-0`}
       >
+        {/* Mobile Menu Button */}
+        <div className="lg:hidden bg-white shadow-sm p-4">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+          >
+            <BookOpen className="w-6 h-6" />
+          </button>
+        </div>
+
         {/* Course Header */}
         <div className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 py-6">
@@ -331,15 +339,15 @@ export default function CourseDetail({
               </div>
             </div>
 
-            <div className="mt-4 flex items-start justify-between">
-              <div className="flex items-center space-x-4">
+            <div className="mt-4 flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <div className="text-4xl">{course.icon}</div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
+                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
                     {course.name}
                   </h1>
                   <p className="text-gray-600 mt-2">{course.description}</p>
-                  <div className="flex items-center space-x-4 mt-3 text-sm text-gray-500">
+                  <div className="flex flex-wrap items-center gap-2 lg:gap-4 mt-3 text-sm text-gray-500">
                     <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
                       {course.difficulty}
                     </span>
@@ -353,16 +361,16 @@ export default function CourseDetail({
                 <button
                   onClick={handleEnroll}
                   disabled={enrolling}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-blue-400"
+                  className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-blue-400"
                 >
                   {enrolling ? "Enrolling..." : "Enroll Now"}
                 </button>
               ) : (
-                <div className="text-right">
+                <div className="text-center lg:text-right">
                   <div className="text-sm text-gray-600 mb-1">
                     Progress: {completedLessons}/{totalLessons} lessons
                   </div>
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                  <div className="w-full lg:w-32 bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-green-600 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${progressPercentage}%` }}
@@ -380,8 +388,8 @@ export default function CourseDetail({
         {/* Course Content */}
         <div className="max-w-7xl mx-auto px-4 py-8">
           {!course.isEnrolled ? (
-            <div className="bg-white rounded-lg shadow p-8 text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <div className="bg-white rounded-lg shadow p-6 lg:p-8 text-center">
+              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-4">
                 Enroll to Access Lessons
               </h2>
               <p className="text-gray-600 mb-6">
@@ -391,14 +399,14 @@ export default function CourseDetail({
               <button
                 onClick={handleEnroll}
                 disabled={enrolling}
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-blue-400"
+                className="w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-blue-400"
               >
                 {enrolling ? "Enrolling..." : "Enroll Now"}
               </button>
             </div>
           ) : (
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-6">
                 Course Lessons
               </h2>
 
@@ -411,7 +419,7 @@ export default function CourseDetail({
                 return (
                   <div
                     key={lesson.id}
-                    className={`bg-white rounded-lg shadow p-6 border-l-4 ${
+                    className={`bg-white rounded-lg shadow p-4 lg:p-6 border-l-4 ${
                       lesson.isCompleted
                         ? "border-green-500"
                         : canAccess
@@ -419,7 +427,7 @@ export default function CourseDetail({
                         : "border-gray-300"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                       <div className="flex items-center space-x-4">
                         <div
                           className={`flex items-center justify-center w-8 h-8 rounded-full ${
@@ -462,7 +470,7 @@ export default function CourseDetail({
                       {canAccess && (
                         <Link
                           href={`/courses/${course.id}/lessons/${lesson.id}`}
-                          className={`px-4 py-2 rounded-lg font-medium ${
+                          className={`w-full sm:w-auto text-center px-4 py-2 rounded-lg font-medium ${
                             lesson.isCompleted
                               ? "bg-green-100 text-green-700 hover:bg-green-200"
                               : "bg-blue-100 text-blue-700 hover:bg-blue-200"

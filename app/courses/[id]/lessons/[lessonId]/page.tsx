@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BookOpen, Home, ArrowLeft, CheckCircle, Lock } from "lucide-react";
+import { BookOpen, ArrowLeft, CheckCircle, Lock } from "lucide-react";
 
 interface Lesson {
   id: string;
@@ -157,23 +157,23 @@ export default function LessonPage({
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full bg-slate-900 text-white shadow-lg border-r transition-all duration-300 z-40 ${
-          sidebarOpen ? "w-80" : "w-16"
-        }`}
+        className={`fixed left-0 top-0 h-full bg-slate-900 text-white shadow-lg transition-all duration-300 z-40 ${
+          sidebarOpen ? "w-64" : "w-16"
+        } lg:block ${sidebarOpen ? "" : "hidden lg:block"}`}
       >
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-slate-700">
-          <div className="flex items-center justify-between">
-            {sidebarOpen && lessonData && (
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl">{lessonData.course.icon}</span>
-                <div>
-                  <h2 className="font-semibold text-white truncate">
-                    {lessonData.course.name}
-                  </h2>
-                  <p className="text-sm text-slate-300">Course Progress</p>
-                </div>
-              </div>
+        <div className="p-6">
+          <div
+            className={`flex items-center ${
+              sidebarOpen ? "justify-between" : "justify-center"
+            }`}
+          >
+            {sidebarOpen && (
+              <h1 className="text-2xl font-bold text-blue-400 mb-0">
+                <Link href="/" className="hover:text-blue-300">
+                  GoCode
+                </Link>
+              </h1>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -186,18 +186,22 @@ export default function LessonPage({
               )}
             </button>
           </div>
+          {sidebarOpen && lessonData && (
+            <div className="flex items-center space-x-2 mt-8">
+              <span className="text-xl">{lessonData.course.icon}</span>
+              <div>
+                <h2 className="font-semibold text-white truncate text-sm">
+                  {lessonData.course.name}
+                </h2>
+                <p className="text-xs text-slate-300">Course Progress</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Navigation Links */}
         {sidebarOpen && (
-          <div className="p-4 border-b border-slate-700">
-            <Link
-              href="/"
-              className="flex items-center space-x-2 text-slate-300 hover:text-blue-400 mb-2"
-            >
-              <Home className="w-4 h-4" />
-              <span>Home</span>
-            </Link>
+          <div className="px-6 pb-4">
             {lessonData && (
               <Link
                 href={`/courses/${lessonData.course.id}`}
@@ -213,7 +217,7 @@ export default function LessonPage({
         {/* Lessons List */}
         <div className="flex-1 overflow-y-auto">
           {sidebarOpen && lessonData && (
-            <div className="p-4">
+            <div className="px-6 pb-6">
               <h3 className="font-semibold text-white mb-4">Lessons</h3>
               <div className="space-y-2">
                 {allLessons.map((lessonItem, index) => {
@@ -297,7 +301,7 @@ export default function LessonPage({
           )}
 
           {!sidebarOpen && lessonData && (
-            <div className="p-2">
+            <div className="flex flex-col items-center pt-4">
               {allLessons.map((lessonItem, index) => {
                 const isCurrentLesson = lessonItem.id === lessonData.lesson.id;
                 const isCompleted = lessonItem.isCompleted;
@@ -351,15 +355,25 @@ export default function LessonPage({
       {/* Main Content */}
       <div
         className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-80" : "ml-16"
-        }`}
+          sidebarOpen ? "lg:ml-64" : "lg:ml-16"
+        } ml-0`}
       >
+        {/* Mobile Menu Button */}
+        <div className="lg:hidden bg-white shadow-sm p-4">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+          >
+            <BookOpen className="w-6 h-6" />
+          </button>
+        </div>
+
         {/* Header */}
         <div className="bg-white shadow-sm border-b">
           <div className="max-w-4xl mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center space-x-4">
-                <h1 className="text-xl font-semibold text-gray-900">
+                <h1 className="text-lg lg:text-xl font-semibold text-gray-900">
                   {lesson.title}
                 </h1>
               </div>
@@ -375,7 +389,7 @@ export default function LessonPage({
                   <button
                     onClick={markAsComplete}
                     disabled={completing}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 disabled:bg-green-400"
+                    className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 disabled:bg-green-400"
                   >
                     {completing ? "Marking Complete..." : "Mark as Complete"}
                   </button>
@@ -388,7 +402,7 @@ export default function LessonPage({
         {/* Content */}
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-8">
+            <div className="p-6 lg:p-8">
               {/* Lesson Header */}
               <div className="mb-8">
                 <div className="flex items-center space-x-3 mb-4">
@@ -397,7 +411,7 @@ export default function LessonPage({
                     Lesson {lesson.order}
                   </span>
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
                   {lesson.title}
                 </h1>
               </div>
@@ -425,7 +439,7 @@ export default function LessonPage({
                   <button
                     onClick={markAsComplete}
                     disabled={completing}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-400"
+                    className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-400"
                   >
                     {completing
                       ? "Marking Complete..."
@@ -448,12 +462,12 @@ export default function LessonPage({
           </div>
 
           {/* Navigation */}
-          <div className="mt-8 flex items-center justify-between">
+          <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div>
               {previousLesson ? (
                 <Link
                   href={`/courses/${course.id}/lessons/${previousLesson.id}`}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50"
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 w-full sm:w-auto text-center"
                 >
                   ← Previous: {previousLesson.title}
                 </Link>
@@ -466,21 +480,21 @@ export default function LessonPage({
               {nextLesson && lesson.isCompleted ? (
                 <Link
                   href={`/courses/${course.id}/lessons/${nextLesson.id}`}
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto text-center"
                 >
                   Next: {nextLesson.title} →
                 </Link>
               ) : nextLesson && !lesson.isCompleted ? (
                 <button
                   disabled
-                  className="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+                  className="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed w-full sm:w-auto text-center"
                 >
                   Complete this lesson to continue →
                 </button>
               ) : (
                 <Link
                   href={`/courses/${course.id}`}
-                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 w-full sm:w-auto text-center"
                 >
                   Back to Course →
                 </Link>
