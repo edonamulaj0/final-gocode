@@ -1,30 +1,34 @@
 "use client";
 
-// This is a React component for a sign-in page, designed for a Next.js App Router.
-// It integrates the UI from the previous version with the functional logic you provided,
-// including state management, NextAuth signIn, and router handling.
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-// Define the main component for the sign-in page.
 export default function SignIn() {
-  // State variables for email, password, error message, and loading state.
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Initialize the Next.js router.
-  const router = useRouter();
+  // Initialize search params.
+  const searchParams = useSearchParams();
+
+  // Check for success message from signup
+  useEffect(() => {
+    const success = searchParams.get("success");
+    if (success) {
+      setSuccessMessage(success);
+    }
+  }, [searchParams]);
 
   // Function to handle form submission.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccessMessage(""); // Clear success message when attempting to sign in
 
     try {
       // Call the NextAuth signIn function with credentials.
@@ -38,9 +42,8 @@ export default function SignIn() {
         // If there's an error, set the error message.
         setError("Invalid credentials");
       } else {
-        // If sign-in is successful, redirect to the home page and refresh.
-        router.push("/");
-        router.refresh();
+        // If sign-in is successful, redirect to the home page
+        window.location.href = "/"; // Use window.location for clean redirect
       }
     } catch {
       // Handle unexpected errors during the sign-in process.
@@ -66,9 +69,18 @@ export default function SignIn() {
 
         {/* Form element with the handleSubmit function */}
         <form className="space-y-4" onSubmit={handleSubmit}>
+          {/* Success message display */}
+          {successMessage && (
+            <div className="text-sm text-center text-green-600 bg-green-50 p-3 rounded-md">
+              {successMessage}
+            </div>
+          )}
+
           {/* Error message display, conditionally rendered */}
           {error && (
-            <div className="text-sm text-center text-red-600">{error}</div>
+            <div className="text-sm text-center text-red-600 bg-red-50 p-3 rounded-md">
+              {error}
+            </div>
           )}
 
           {/* Email input field */}
