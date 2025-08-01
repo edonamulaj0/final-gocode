@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, Lock, BookOpen, Home, ArrowLeft } from "lucide-react";
+import { BookOpen, Home, ArrowLeft, CheckCircle, Lock } from "lucide-react";
 
 interface Lesson {
   id: string;
@@ -157,27 +157,27 @@ export default function LessonPage({
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full bg-white shadow-lg border-r transition-all duration-300 z-40 ${
+        className={`fixed left-0 top-0 h-full bg-slate-900 text-white shadow-lg border-r transition-all duration-300 z-40 ${
           sidebarOpen ? "w-80" : "w-16"
         }`}
       >
         {/* Sidebar Header */}
-        <div className="p-4 border-b">
+        <div className="p-4 border-b border-slate-700">
           <div className="flex items-center justify-between">
-            {sidebarOpen && (
+            {sidebarOpen && lessonData && (
               <div className="flex items-center space-x-2">
-                <span className="text-2xl">{course.icon}</span>
+                <span className="text-2xl">{lessonData.course.icon}</span>
                 <div>
-                  <h2 className="font-semibold text-gray-900 truncate">
-                    {course.name}
+                  <h2 className="font-semibold text-white truncate">
+                    {lessonData.course.name}
                   </h2>
-                  <p className="text-sm text-gray-500">Course Progress</p>
+                  <p className="text-sm text-slate-300">Course Progress</p>
                 </div>
               </div>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100"
+              className="p-2 rounded-lg hover:bg-slate-800 text-white"
             >
               {sidebarOpen ? (
                 <ArrowLeft className="w-5 h-5" />
@@ -190,32 +190,35 @@ export default function LessonPage({
 
         {/* Navigation Links */}
         {sidebarOpen && (
-          <div className="p-4 border-b">
+          <div className="p-4 border-b border-slate-700">
             <Link
               href="/"
-              className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 mb-2"
+              className="flex items-center space-x-2 text-slate-300 hover:text-blue-400 mb-2"
             >
               <Home className="w-4 h-4" />
               <span>Home</span>
             </Link>
-            <Link
-              href={`/courses/${course.id}`}
-              className="flex items-center space-x-2 text-gray-600 hover:text-blue-600"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Course</span>
-            </Link>
+            {lessonData && (
+              <Link
+                href={`/courses/${lessonData.course.id}`}
+                className="flex items-center space-x-2 text-slate-300 hover:text-blue-400"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back to Course</span>
+              </Link>
+            )}
           </div>
         )}
 
         {/* Lessons List */}
         <div className="flex-1 overflow-y-auto">
-          {sidebarOpen && (
+          {sidebarOpen && lessonData && (
             <div className="p-4">
-              <h3 className="font-semibold text-gray-900 mb-4">Lessons</h3>
+              <h3 className="font-semibold text-white mb-4">Lessons</h3>
               <div className="space-y-2">
                 {allLessons.map((lessonItem, index) => {
-                  const isCurrentLesson = lessonItem.id === lesson.id;
+                  const isCurrentLesson =
+                    lessonItem.id === lessonData.lesson.id;
                   const isCompleted = lessonItem.isCompleted;
                   const isAccessible =
                     index === 0 || allLessons[index - 1]?.isCompleted;
@@ -224,11 +227,11 @@ export default function LessonPage({
                     <div key={lessonItem.id}>
                       {isAccessible ? (
                         <Link
-                          href={`/courses/${course.id}/lessons/${lessonItem.id}`}
+                          href={`/courses/${lessonData.course.id}/lessons/${lessonItem.id}`}
                           className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
                             isCurrentLesson
-                              ? "bg-blue-100 border border-blue-200"
-                              : "hover:bg-gray-100"
+                              ? "bg-blue-600 border border-blue-500"
+                              : "hover:bg-slate-800"
                           }`}
                         >
                           <div
@@ -237,7 +240,7 @@ export default function LessonPage({
                                 ? "bg-green-500 text-white"
                                 : isCurrentLesson
                                 ? "bg-blue-500 text-white"
-                                : "bg-gray-200 text-gray-600"
+                                : "bg-slate-600 text-slate-300"
                             }`}
                           >
                             {isCompleted ? (
@@ -250,8 +253,8 @@ export default function LessonPage({
                             <p
                               className={`text-sm font-medium truncate ${
                                 isCurrentLesson
-                                  ? "text-blue-900"
-                                  : "text-gray-900"
+                                  ? "text-white"
+                                  : "text-slate-300"
                               }`}
                             >
                               {lessonItem.title}
@@ -259,10 +262,10 @@ export default function LessonPage({
                             <p
                               className={`text-xs ${
                                 isCompleted
-                                  ? "text-green-600"
+                                  ? "text-green-400"
                                   : isCurrentLesson
-                                  ? "text-blue-600"
-                                  : "text-gray-500"
+                                  ? "text-blue-300"
+                                  : "text-slate-400"
                               }`}
                             >
                               {isCompleted
@@ -274,15 +277,15 @@ export default function LessonPage({
                           </div>
                         </Link>
                       ) : (
-                        <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50">
-                          <div className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-300 text-gray-500">
+                        <div className="flex items-center space-x-3 p-3 rounded-lg bg-slate-800">
+                          <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-600 text-slate-400">
                             <Lock className="w-3 h-3" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-gray-500 truncate">
+                            <p className="text-sm text-slate-400 truncate">
                               {lessonItem.title}
                             </p>
-                            <p className="text-xs text-gray-400">Locked</p>
+                            <p className="text-xs text-slate-500">Locked</p>
                           </div>
                         </div>
                       )}
@@ -293,10 +296,10 @@ export default function LessonPage({
             </div>
           )}
 
-          {!sidebarOpen && (
+          {!sidebarOpen && lessonData && (
             <div className="p-2">
               {allLessons.map((lessonItem, index) => {
-                const isCurrentLesson = lessonItem.id === lesson.id;
+                const isCurrentLesson = lessonItem.id === lessonData.lesson.id;
                 const isCompleted = lessonItem.isCompleted;
                 const isAccessible =
                   index === 0 || allLessons[index - 1]?.isCompleted;
@@ -305,11 +308,11 @@ export default function LessonPage({
                   <div key={lessonItem.id} className="mb-2">
                     {isAccessible ? (
                       <Link
-                        href={`/courses/${course.id}/lessons/${lessonItem.id}`}
+                        href={`/courses/${lessonData.course.id}/lessons/${lessonItem.id}`}
                         className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors ${
                           isCurrentLesson
-                            ? "bg-blue-100 border border-blue-200"
-                            : "hover:bg-gray-100"
+                            ? "bg-blue-600 border border-blue-500"
+                            : "hover:bg-slate-800"
                         }`}
                         title={lessonItem.title}
                       >
@@ -319,7 +322,7 @@ export default function LessonPage({
                               ? "bg-green-500 text-white"
                               : isCurrentLesson
                               ? "bg-blue-500 text-white"
-                              : "bg-gray-200 text-gray-600"
+                              : "bg-slate-600 text-slate-300"
                           }`}
                         >
                           {isCompleted ? (
@@ -331,10 +334,10 @@ export default function LessonPage({
                       </Link>
                     ) : (
                       <div
-                        className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-50"
+                        className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-800"
                         title={`${lessonItem.title} (Locked)`}
                       >
-                        <Lock className="w-4 h-4 text-gray-400" />
+                        <Lock className="w-4 h-4 text-slate-400" />
                       </div>
                     )}
                   </div>
