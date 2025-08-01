@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Home,
   BookOpen,
@@ -36,10 +37,39 @@ interface Course {
 
 const GoCodeWebsite = () => {
   const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState("home");
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Helper function to change page and update URL
+  const changePage = (page: string) => {
+    setCurrentPage(page);
+    // Update URL without page parameter for home, with parameter for other pages
+    if (page === "home") {
+      router.push("/", { scroll: false });
+    } else {
+      router.push(`/?page=${page}`, { scroll: false });
+    }
+  };
+
+  // Handle URL parameters and automatic dashboard redirect for logged-in users
+  useEffect(() => {
+    const pageParam = searchParams.get("page");
+
+    if (pageParam) {
+      // If there's a page parameter in URL, use it
+      setCurrentPage(pageParam);
+    } else if (session && status === "authenticated") {
+      // If user is logged in and no specific page is requested, go to dashboard
+      setCurrentPage("dashboard");
+    } else if (!session && status === "unauthenticated") {
+      // If user is not logged in, go to home
+      setCurrentPage("home");
+    }
+  }, [session, status, searchParams]);
 
   useEffect(() => {
     fetchCourses();
@@ -99,7 +129,10 @@ const GoCodeWebsite = () => {
               </button>
             ) : (
               <button
-                onClick={() => signOut()}
+                onClick={() => {
+                  signOut();
+                  changePage("home");
+                }}
                 className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-slate-800 transition-colors text-red-400"
               >
                 <LogOut size={20} />
@@ -169,6 +202,7 @@ const GoCodeWebsite = () => {
                 <button
                   onClick={() => {
                     signOut();
+                    changePage("home");
                     setMobileMenuOpen(false);
                   }}
                   className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-slate-800 transition-colors text-red-400"
@@ -209,7 +243,7 @@ const GoCodeWebsite = () => {
     page: string;
   }) => (
     <button
-      onClick={() => setCurrentPage(page)}
+      onClick={() => changePage(page)}
       className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-colors ${
         currentPage === page ? "bg-blue-600" : "hover:bg-slate-800"
       }`}
@@ -230,7 +264,7 @@ const GoCodeWebsite = () => {
   }) => (
     <button
       onClick={() => {
-        setCurrentPage(page);
+        changePage(page);
         setMobileMenuOpen(false);
       }}
       className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-colors ${

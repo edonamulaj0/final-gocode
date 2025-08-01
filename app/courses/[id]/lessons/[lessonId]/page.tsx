@@ -41,7 +41,7 @@ export default function LessonPage({
   const [allLessons, setAllLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [resolvedParams, setResolvedParams] = useState<{
     id: string;
     lessonId: string;
@@ -94,6 +94,24 @@ export default function LessonPage({
 
     fetchLessonAndCourse();
   }, [resolvedParams, session, router]);
+
+  // Set initial sidebar state based on screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      // Check if screen is lg (1024px) or larger - keep sidebar open on desktop
+      const isDesktop = window.innerWidth >= 1024;
+      setSidebarOpen(isDesktop);
+    };
+
+    // Set initial state
+    checkScreenSize();
+
+    // Listen for window resize events
+    window.addEventListener("resize", checkScreenSize);
+
+    // Cleanup event listener
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   const markAsComplete = async () => {
     if (!lessonData?.lesson || lessonData.lesson.isCompleted || !resolvedParams)

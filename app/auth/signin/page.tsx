@@ -18,8 +18,11 @@ export default function SignIn() {
   // Check for success message from signup
   useEffect(() => {
     const success = searchParams.get("success");
+    const message = searchParams.get("message");
     if (success) {
       setSuccessMessage(success);
+    } else if (message) {
+      setSuccessMessage(message);
     }
   }, [searchParams]);
 
@@ -42,8 +45,8 @@ export default function SignIn() {
         // If there's an error, set the error message.
         setError("Invalid credentials");
       } else {
-        // If sign-in is successful, redirect to the home page
-        window.location.href = "/"; // Use window.location for clean redirect
+        // If sign-in is successful, redirect to the dashboard
+        window.location.href = "/?page=dashboard"; // Redirect to dashboard
       }
     } catch {
       // Handle unexpected errors during the sign-in process.

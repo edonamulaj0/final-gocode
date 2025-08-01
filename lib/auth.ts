@@ -61,6 +61,22 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    redirect: async ({ url, baseUrl }) => {
+      // If the redirect URL is the base URL (after login), redirect to dashboard
+      if (url === baseUrl || url === `${baseUrl}/`) {
+        return `${baseUrl}/?page=dashboard`;
+      }
+      // If it's a relative URL, make it absolute
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      // If the URL is on the same domain, allow it
+      if (new URL(url).origin === baseUrl) {
+        return url;
+      }
+      // Otherwise, redirect to dashboard
+      return `${baseUrl}/?page=dashboard`;
+    },
   },
   pages: {
     signIn: "/auth/signin",

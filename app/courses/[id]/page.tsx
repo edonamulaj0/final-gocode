@@ -35,7 +35,7 @@ export default function CourseDetail({
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(
     null
   );
@@ -67,6 +67,24 @@ export default function CourseDetail({
 
     fetchCourse();
   }, [resolvedParams, session]);
+
+  // Set initial sidebar state based on screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      // Check if screen is lg (1024px) or larger - keep sidebar open on desktop
+      const isDesktop = window.innerWidth >= 1024;
+      setSidebarOpen(isDesktop);
+    };
+
+    // Set initial state
+    checkScreenSize();
+
+    // Listen for window resize events
+    window.addEventListener("resize", checkScreenSize);
+
+    // Cleanup event listener
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   const refetchCourse = async () => {
     if (!resolvedParams) return;
