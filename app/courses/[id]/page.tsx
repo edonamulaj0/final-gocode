@@ -4,7 +4,36 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BookOpen, ArrowLeft, CheckCircle, Lock } from "lucide-react";
+import {
+  BookOpen,
+  ArrowLeft,
+  CheckCircle,
+  Lock,
+  MoreHorizontal,
+} from "lucide-react";
+
+// Professional Loading Component
+const LoadingSpinner = ({
+  size = "md",
+  className = "",
+}: {
+  size?: "sm" | "md" | "lg";
+  className?: string;
+}) => {
+  const sizeClasses = {
+    sm: "w-4 h-4",
+    md: "w-8 h-8",
+    lg: "w-12 h-12",
+  };
+
+  return (
+    <div className={`flex items-center justify-center ${className}`}>
+      <MoreHorizontal
+        className={`${sizeClasses[size]} animate-pulse text-blue-600`}
+      />
+    </div>
+  );
+};
 
 interface Lesson {
   id: string;
@@ -131,8 +160,34 @@ export default function CourseDetail({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-lg">Loading course...</div>
+      <div className="min-h-screen bg-gray-50 flex">
+        {/* Course Sidebar - Skeleton */}
+        <div className="fixed left-0 top-0 h-full w-64 bg-slate-900 text-white shadow-lg z-40 lg:block">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-blue-400 mb-0">
+                <Link href="/" className="hover:text-blue-300">
+                  GoCode
+                </Link>
+              </h1>
+            </div>
+            <div className="flex items-center space-x-2 mt-8">
+              <div className="w-8 h-8 bg-slate-700 rounded animate-pulse"></div>
+              <div>
+                <div className="w-24 h-4 bg-slate-700 rounded animate-pulse mb-1"></div>
+                <div className="w-16 h-3 bg-slate-800 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 lg:ml-64 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <LoadingSpinner size="lg" />
+            <p className="text-gray-600 text-lg">Loading course...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -336,28 +391,41 @@ export default function CourseDetail({
           sidebarOpen ? "lg:ml-64" : "lg:ml-16"
         } ml-0`}
       >
-        {/* Mobile Menu Button */}
+        {/* Mobile Header */}
         <div className="lg:hidden bg-white shadow-sm p-4">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
-          >
-            <BookOpen className="w-6 h-6" />
-          </button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+              >
+                <BookOpen className="w-6 h-6" />
+              </button>
+              <div className="flex items-center space-x-2">
+                <span className="text-xl">{course.icon}</span>
+                <h1 className="text-lg font-semibold text-gray-900 truncate">
+                  {course.name}
+                </h1>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Course Header */}
         <div className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-4">
-                <Link href="/" className="text-blue-600 hover:text-blue-800">
+                <Link
+                  href="/?page=courses"
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
                   ← Back to Courses
                 </Link>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
               <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <div className="text-4xl">{course.icon}</div>
                 <div>
@@ -379,9 +447,10 @@ export default function CourseDetail({
                 <button
                   onClick={handleEnroll}
                   disabled={enrolling}
-                  className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-blue-400"
+                  className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-blue-400 inline-flex items-center justify-center space-x-2"
                 >
-                  {enrolling ? "Enrolling..." : "Enroll Now"}
+                  {enrolling && <LoadingSpinner size="sm" />}
+                  <span>{enrolling ? "Enrolling..." : "Enroll Now"}</span>
                 </button>
               ) : (
                 <div className="text-center lg:text-right">

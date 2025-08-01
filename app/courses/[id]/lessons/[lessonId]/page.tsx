@@ -4,7 +4,36 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BookOpen, ArrowLeft, CheckCircle, Lock } from "lucide-react";
+import {
+  BookOpen,
+  ArrowLeft,
+  CheckCircle,
+  Lock,
+  MoreHorizontal,
+} from "lucide-react";
+
+// Professional Loading Component
+const LoadingSpinner = ({
+  size = "md",
+  className = "",
+}: {
+  size?: "sm" | "md" | "lg";
+  className?: string;
+}) => {
+  const sizeClasses = {
+    sm: "w-4 h-4",
+    md: "w-8 h-8",
+    lg: "w-12 h-12",
+  };
+
+  return (
+    <div className={`flex items-center justify-center ${className}`}>
+      <MoreHorizontal
+        className={`${sizeClasses[size]} animate-pulse text-blue-600`}
+      />
+    </div>
+  );
+};
 
 interface Lesson {
   id: string;
@@ -145,8 +174,50 @@ export default function LessonPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-lg">Loading lesson...</div>
+      <div className="min-h-screen bg-gray-50 flex">
+        {/* Sidebar Skeleton */}
+        <div className="fixed left-0 top-0 h-full w-64 bg-slate-900 text-white shadow-lg z-40 lg:block">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-blue-400 mb-0">
+                <Link href="/" className="hover:text-blue-300">
+                  GoCode
+                </Link>
+              </h1>
+            </div>
+            <div className="flex items-center space-x-2 mt-8">
+              <div className="w-8 h-8 bg-slate-700 rounded animate-pulse"></div>
+              <div>
+                <div className="w-24 h-4 bg-slate-700 rounded animate-pulse mb-1"></div>
+                <div className="w-16 h-3 bg-slate-800 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-6 pb-4">
+            <div className="w-32 h-4 bg-slate-700 rounded animate-pulse"></div>
+          </div>
+
+          <div className="px-6 pb-6">
+            <div className="w-16 h-4 bg-slate-700 rounded animate-pulse mb-4"></div>
+            <div className="space-y-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="w-full h-12 bg-slate-800 rounded animate-pulse"
+                ></div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 lg:ml-64 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <LoadingSpinner size="lg" />
+            <p className="text-gray-600 text-lg">Loading lesson...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -376,19 +447,43 @@ export default function LessonPage({
           sidebarOpen ? "lg:ml-64" : "lg:ml-16"
         } ml-0`}
       >
-        {/* Mobile Menu Button */}
+        {/* Mobile Header */}
         <div className="lg:hidden bg-white shadow-sm p-4">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
-          >
-            <BookOpen className="w-6 h-6" />
-          </button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+              >
+                <BookOpen className="w-6 h-6" />
+              </button>
+              {lessonData && (
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg">{course.icon}</span>
+                  <h1 className="text-lg font-semibold text-gray-900 truncate">
+                    {lesson.title}
+                  </h1>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Header */}
         <div className="bg-white shadow-sm border-b">
           <div className="max-w-4xl mx-auto px-4 py-4">
+            {/* Back to Course Navigation */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-4">
+                <Link
+                  href={`/courses/${course.id}`}
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  ← Back to Course
+                </Link>
+              </div>
+            </div>
+
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center space-x-4">
                 <h1 className="text-lg lg:text-xl font-semibold text-gray-900">
@@ -407,9 +502,12 @@ export default function LessonPage({
                   <button
                     onClick={markAsComplete}
                     disabled={completing}
-                    className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 disabled:bg-green-400"
+                    className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 disabled:bg-green-400 inline-flex items-center justify-center space-x-2"
                   >
-                    {completing ? "Marking Complete..." : "Mark as Complete"}
+                    {completing && <LoadingSpinner size="sm" />}
+                    <span>
+                      {completing ? "Marking Complete..." : "Mark as Complete"}
+                    </span>
                   </button>
                 )}
               </div>
