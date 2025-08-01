@@ -23,6 +23,7 @@ model User {
   enrollments CourseEnrollment[]
   submissions PracticeSubmission[]
   progress    UserProgress[]
+  lessonCompletions LessonCompletion[]
 
   @@map("users")
 }
@@ -54,13 +55,29 @@ model Lesson {
   content     String   // JSON or markdown content
   order       Int
   courseId    String
+  isPublished Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  completions LessonCompletion[]
 
   @@map("lessons")
+}
+
+model LessonCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  completedAt DateTime @default(now())
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@map("lesson_completions")
 }
 
 model CourseEnrollment {

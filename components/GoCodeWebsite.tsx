@@ -454,6 +454,9 @@ const GoCodeWebsite = () => {
                     onClick={() => {
                       if (!course.isEnrolled) {
                         enrollInCourse(course.id);
+                      } else {
+                        // Navigate to course page
+                        window.location.href = `/courses/${course.id}`;
                       }
                     }}
                     className={`flex items-center justify-center space-x-2 px-4 md:px-6 py-3 rounded-lg font-semibold transition-colors mt-4 md:mt-0 w-full md:w-auto ${
@@ -570,14 +573,12 @@ const GoCodeWebsite = () => {
             {courses.map((course, index) => {
               const isUnlocked = course.isEnrolled || index === 0;
               return (
-                <button
+                <div
                   key={course.id}
-                  onClick={() => isUnlocked && setSelectedCourse(course)}
-                  disabled={!isUnlocked}
-                  className={`text-left bg-white rounded-xl shadow-md p-6 border-2 transition-all ${
+                  className={`bg-white rounded-xl shadow-md p-6 border-2 transition-all ${
                     isUnlocked
                       ? "border-slate-200 hover:border-blue-300 hover:shadow-lg"
-                      : "border-slate-100 opacity-60 cursor-not-allowed"
+                      : "border-slate-100 opacity-60"
                   }`}
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -585,14 +586,56 @@ const GoCodeWebsite = () => {
                     {!isUnlocked && (
                       <Lock className="text-slate-400" size={20} />
                     )}
+                    {course.isCompleted && (
+                      <CheckCircle className="text-green-500" size={20} />
+                    )}
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{course.name}</h3>
-                  <p className="text-slate-600 text-sm">
-                    {isUnlocked
-                      ? "Click to start practicing"
-                      : "Complete previous course to unlock"}
+                  <p className="text-slate-600 text-sm mb-4">
+                    {course.description}
                   </p>
-                </button>
+
+                  {course.isEnrolled && (
+                    <div className="mb-4">
+                      <div className="flex justify-between text-sm text-gray-600 mb-1">
+                        <span>Progress</span>
+                        <span>{course.progress || 0}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${course.progress || 0}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      {course.difficulty}
+                    </span>
+                    <span>{course.duration}</span>
+                    <span>{course.lessons} lessons</span>
+                  </div>
+
+                  {isUnlocked ? (
+                    <button
+                      onClick={() => setSelectedCourse(course)}
+                      className="w-full bg-green-600 text-white py-2 px-4 rounded-lg text-center block hover:bg-green-700 transition-colors"
+                    >
+                      {course.isEnrolled
+                        ? "Practice Problems"
+                        : "Start Practicing"}
+                    </button>
+                  ) : (
+                    <button
+                      disabled
+                      className="w-full bg-gray-300 text-gray-500 py-2 px-4 rounded-lg cursor-not-allowed"
+                    >
+                      Complete previous course to unlock
+                    </button>
+                  )}
+                </div>
               );
             })}
           </div>
