@@ -156,12 +156,15 @@ export default function CourseDetail({
 
       if (response.ok) {
         await refetchCourse(); // Refresh course data
+        // Show success message
+        alert("Successfully enrolled in the course!");
       } else {
-        alert("Failed to enroll in course");
+        const errorData = await response.json();
+        alert(`Failed to enroll in course: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Error enrolling:", error);
-      alert("Error enrolling in course");
+      alert("Error enrolling in course. Please try again.");
     } finally {
       setEnrolling(false);
     }

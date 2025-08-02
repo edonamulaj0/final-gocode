@@ -152,10 +152,15 @@ const GoCodeWebsite = () => {
         body: JSON.stringify({ courseId }),
       });
       if (response.ok) {
-        fetchCourses();
+        await fetchCourses(); // Refresh courses data
+        alert("Successfully enrolled in the course!");
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to enroll: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Error enrolling in course:", error);
+      alert("Error enrolling in course. Please try again.");
     }
   };
 
@@ -617,11 +622,15 @@ const GoCodeWebsite = () => {
                     </div>
                     <button
                       disabled={!isUnlocked || !session}
-                      onClick={() => {
+                      onClick={async () => {
+                        if (!session) {
+                          alert("Please log in first.");
+                          return;
+                        }
                         if (!course.isEnrolled) {
-                          enrollInCourse(course.id);
+                          await enrollInCourse(course.id);
                         } else {
-                          window.location.href = `/courses/${course.id}`;
+                          router.push(`/courses/${course.id}`);
                         }
                       }}
                       className={`flex items-center justify-center space-x-2 px-4 md:px-6 py-3 rounded-lg font-semibold transition-colors mt-4 md:mt-0 w-full md:w-auto ${
@@ -858,24 +867,45 @@ const GoCodeWebsite = () => {
                           )}
                         </div>
                       </div>
-                      <button
-                        disabled={!isUnlocked || !session}
-                        onClick={() => setSelectedCourse(course)}
-                        className={`flex items-center justify-center space-x-2 px-4 md:px-6 py-3 rounded-lg font-semibold transition-colors mt-4 md:mt-0 w-full md:w-auto ${
-                          isUnlocked && session
-                            ? "bg-blue-600 text-white hover:bg-blue-700"
-                            : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                        }`}
-                      >
-                        <Play size={18} />
-                        <span>
-                          {!session
-                            ? "Login Required"
-                            : !course.isEnrolled
-                            ? "Enroll to Practice"
-                            : "Practice Problems"}
-                        </span>
-                      </button>
+                      <div className="flex flex-col md:flex-row gap-2 mt-4 md:mt-0 w-full md:w-auto">
+                        {!course.isEnrolled && session ? (
+                          <button
+                            onClick={() => enrollInCourse(course.id)}
+                            className="flex items-center justify-center space-x-2 px-4 md:px-6 py-3 rounded-lg font-semibold transition-colors bg-green-600 text-white hover:bg-green-700"
+                          >
+                            <UserPlus size={18} />
+                            <span>Enroll in Course</span>
+                          </button>
+                        ) : null}
+                        <button
+                          disabled={!isUnlocked || !session || !course.isEnrolled}
+                          onClick={() => {
+                            if (!session) {
+                              alert("Please log in to access practice problems.");
+                              return;
+                            }
+                            if (!course.isEnrolled) {
+                              alert("Please enroll in the course first to access practice problems.");
+                              return;
+                            }
+                            setSelectedCourse(course);
+                          }}
+                          className={`flex items-center justify-center space-x-2 px-4 md:px-6 py-3 rounded-lg font-semibold transition-colors ${
+                            isUnlocked && session && course.isEnrolled
+                              ? "bg-blue-600 text-white hover:bg-blue-700"
+                              : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                          }`}
+                        >
+                          <Play size={18} />
+                          <span>
+                            {!session
+                              ? "Login Required"
+                              : !course.isEnrolled
+                              ? "Enroll to Practice"
+                              : "Practice Problems"}
+                          </span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
