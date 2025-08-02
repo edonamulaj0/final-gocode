@@ -55,11 +55,32 @@ export async function GET() {
       },
     });
 
-    // Get all courses
+    // Get all courses with stats
     const courses = await prisma.course.findMany({
+      include: {
+        _count: {
+          select: {
+            lessons_rel: true,
+            practices: true,
+            enrollments: true,
+          },
+        },
+      },
       orderBy: {
         order: "asc",
       },
+    });
+
+    // Get all lessons
+    const lessons = await prisma.lesson.findMany({
+      include: {
+        course: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: [{ courseId: "asc" }, { order: "asc" }],
     });
 
     // Get all enrollments
@@ -85,10 +106,12 @@ export async function GET() {
     return NextResponse.json({
       users: users,
       courses: courses,
+      lessons: lessons,
       enrollments: enrollments,
       stats: {
         totalUsers: users.length,
         totalCourses: courses.length,
+        totalLessons: lessons.length,
         totalEnrollments: enrollments.length,
       },
     });

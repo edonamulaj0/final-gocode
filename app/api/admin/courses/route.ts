@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
         lessons: courseData.lessons || 0,
         difficulty: courseData.difficulty || "Beginner",
         order: courseData.order || 1,
+        isUnlocked: courseData.isUnlocked || false,
       },
     });
 

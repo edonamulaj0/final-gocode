@@ -37,6 +37,7 @@ model Course {
   lessons     Int
   difficulty  String
   order       Int      // For sequential unlocking
+  isUnlocked  Boolean  @default(false) // Manual unlock control
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

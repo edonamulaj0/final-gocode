@@ -13,6 +13,7 @@ async function main() {
       lessons: 24,
       difficulty: "Beginner",
       order: 1,
+      ...{ isUnlocked: true }, // First course is unlocked by default
     },
   });
 
@@ -26,6 +27,7 @@ async function main() {
       lessons: 30,
       difficulty: "Intermediate",
       order: 2,
+      ...{ isUnlocked: false }, // Locked by default, you can unlock it manually
     },
   });
 

@@ -8,6 +8,9 @@ export async function GET() {
     const session = await getServerSession(authOptions);
 
     const courses = await prisma.course.findMany({
+      where: {
+        isUnlocked: true, // Only show unlocked courses to users
+      },
       orderBy: { order: "asc" },
       include: {
         _count: {
@@ -71,6 +74,33 @@ export async function POST(request: NextRequest) {
     }
 
     const { courseId } = await request.json();
+
+    // Debug logging
+    console.log("Enrollment attempt:", {
+      userId: session.user.id,
+      courseId: courseId,
+      userEmail: session.user.email,
+    });
+
+    // Verify user exists
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    });
+
+    if (!user) {
+      console.log("User not found:", session.user.id);
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Verify course exists
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      console.log("Course not found:", courseId);
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+    }
 
     // Check if user is already enrolled
     const existingEnrollment = await prisma.courseEnrollment.findUnique({
