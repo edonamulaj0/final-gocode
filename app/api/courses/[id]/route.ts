@@ -3,6 +3,15 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 
+// Type assertion to access module properties until Prisma client is properly generated
+interface ExtendedPrismaClient {
+  module: {
+    findMany: (args?: unknown) => Promise<unknown[]>;
+  };
+}
+
+const extendedPrisma = prisma as typeof prisma & ExtendedPrismaClient;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -17,18 +26,23 @@ export async function GET(
         lessons_rel: {
           orderBy: { order: "asc" },
         },
-        practices: {
-          orderBy: { createdAt: "asc" },
-        },
-        _count: {
-          select: { lessons_rel: true, practices: true },
-        },
       },
     });
 
     if (!course) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
+
+    // Fetch modules separately
+    const modules = await extendedPrisma.module.findMany({
+      where: { courseId: id },
+      include: {
+        lessons: {
+          orderBy: { order: "asc" },
+        },
+      },
+      orderBy: { order: "asc" },
+    });
 
     let isEnrolled = false;
     let lessonsWithCompletion = course.lessons_rel;
@@ -47,8 +61,8 @@ export async function GET(
       isEnrolled = !!enrollment;
 
       if (isEnrolled) {
-        // Get lesson completions
-        const completions = await prisma.lessonCompletion.findMany({
+        // Get lesson completions for direct course lessons only
+        const directLessonCompletions = await prisma.lessonCompletion.findMany({
           where: {
             userId: session.user.id,
             lesson: {
@@ -58,9 +72,10 @@ export async function GET(
         });
 
         const completionMap = new Map(
-          completions.map((c) => [c.lessonId, true])
+          directLessonCompletions.map((c) => [c.lessonId, true])
         );
 
+        // Update direct course lessons with completion status
         lessonsWithCompletion = course.lessons_rel.map((lesson) => ({
           ...lesson,
           isCompleted: completionMap.has(lesson.id),
@@ -71,7 +86,7 @@ export async function GET(
     const courseData = {
       ...course,
       lessons: lessonsWithCompletion,
-      practiceQuests: course.practices,
+      modules: modules, // Include the actual modules data
       isEnrolled,
     };
 

@@ -24,6 +24,7 @@ model User {
   submissions PracticeSubmission[]
   progress    UserProgress[]
   lessonCompletions LessonCompletion[]
+  moduleCompletions ModuleCompletion[]
 
   @@map("users")
 }
@@ -43,17 +44,18 @@ model Course {
 
   // Relations
   enrollments CourseEnrollment[]
-  lessons_rel Lesson[]
+  modules     Module[]
+  lessons_rel Lesson[] // Keep for backward compatibility during migration
   practices   PracticeQuest[]
   progress    UserProgress[]
 
   @@map("courses")
 }
 
-model Lesson {
+model Module {
   id          String   @id @default(cuid())
-  title       String
-  content     String   // JSON or markdown content
+  name        String
+  description String?
   order       Int
   courseId    String
   isPublished Boolean  @default(true)
@@ -61,10 +63,45 @@ model Lesson {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  course      Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course           Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons          Lesson[]
+  practiceQuests   PracticeQuest[]
+  moduleCompletions ModuleCompletion[]
+
+  @@map("modules")
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   // JSON or markdown content
+  order       Int
+  courseId    String?  // Make optional for backward compatibility
+  moduleId    String?  // New field for module relationship
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  course      Course?           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module      Module?           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   completions LessonCompletion[]
 
   @@map("lessons")
+}
+
+model ModuleCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  moduleId    String
+  completedAt DateTime @default(now())
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, moduleId])
+  @@map("module_completions")
 }
 
 model LessonCompletion {
@@ -117,14 +154,16 @@ model PracticeQuest {
   title       String
   description String
   difficulty  String   // easy, medium, hard
-  courseId    String
+  courseId    String?  // Make optional for backward compatibility
+  moduleId    String?  // New field for module relationship
   testCases   Json     // Array of test cases
   solution    String   // Expected solution
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
-  course      Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      Course?              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module      Module?              @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   submissions PracticeSubmission[]
 
   @@map("practice_quests")

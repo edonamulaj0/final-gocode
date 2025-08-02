@@ -8,14 +8,9 @@ export async function GET() {
     const session = await getServerSession(authOptions);
 
     const courses = await prisma.course.findMany({
-      where: {
-        isUnlocked: true, // Only show unlocked courses to users
-      },
       orderBy: { order: "asc" },
       include: {
-        _count: {
-          select: { lessons_rel: true },
-        },
+        lessons_rel: true,
       },
     });
 
@@ -36,7 +31,7 @@ export async function GET() {
 
         return {
           ...course,
-          lessons: course._count.lessons_rel,
+          lessons: course.lessons_rel.length,
           progress: progress?.progress || 0,
           isEnrolled: !!enrollment,
           isCompleted: enrollment?.isCompleted || false,
@@ -45,7 +40,7 @@ export async function GET() {
     } else {
       coursesWithProgress = courses.map((course) => ({
         ...course,
-        lessons: course._count.lessons_rel,
+        lessons: course.lessons_rel.length,
         progress: 0,
         isEnrolled: false,
         isCompleted: false,

@@ -43,6 +43,14 @@ interface Lesson {
   isCompleted?: boolean;
 }
 
+interface Module {
+  id: string;
+  name: string;
+  description?: string;
+  order: number;
+  lessons: Lesson[];
+}
+
 interface Course {
   id: string;
   name: string;
@@ -50,7 +58,8 @@ interface Course {
   icon: string;
   difficulty: string;
   duration: string;
-  lessons: Lesson[];
+  lessons: Lesson[]; // For backward compatibility
+  modules: Module[]; // New module structure
   isEnrolled: boolean;
 }
 
@@ -192,6 +201,14 @@ export default function CourseDetail({
     );
   }
 
+  const getAllLessons = (course: Course) => {
+    // Get all lessons from both direct course lessons and modules
+    const directLessons = course.lessons || [];
+    const moduleLessons =
+      course.modules?.flatMap((module) => module.lessons) || [];
+    return [...directLessons, ...moduleLessons];
+  };
+
   if (!course) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -200,10 +217,11 @@ export default function CourseDetail({
     );
   }
 
-  const completedLessons = course.lessons.filter(
+  const allLessons = getAllLessons(course);
+  const completedLessons = allLessons.filter(
     (lesson) => lesson.isCompleted
   ).length;
-  const totalLessons = course.lessons.length;
+  const totalLessons = allLessons.length;
   const progressPercentage =
     totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
 
@@ -494,82 +512,199 @@ export default function CourseDetail({
           ) : (
             <div className="space-y-4">
               <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-6">
-                Course Lessons
+                Course Content
               </h2>
 
-              {course.lessons.map((lesson, index) => {
-                const isLocked =
-                  index > 0 && !course.lessons[index - 1].isCompleted;
-                const canAccess =
-                  index === 0 || course.lessons[index - 1].isCompleted;
-
-                return (
-                  <div
-                    key={lesson.id}
-                    className={`bg-white rounded-lg shadow p-4 lg:p-6 border-l-4 ${
-                      lesson.isCompleted
-                        ? "border-green-500"
-                        : canAccess
-                        ? "border-blue-500"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                      <div className="flex items-center space-x-4">
-                        <div
-                          className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                            lesson.isCompleted
-                              ? "bg-green-500 text-white"
-                              : canAccess
-                              ? "bg-blue-500 text-white"
-                              : "bg-gray-300 text-gray-600"
-                          }`}
-                        >
-                          {lesson.isCompleted ? "✓" : lesson.order}
-                        </div>
-
-                        <div>
-                          <h3
-                            className={`text-lg font-semibold ${
-                              canAccess ? "text-gray-900" : "text-gray-500"
-                            }`}
-                          >
-                            {lesson.title}
-                          </h3>
-                          <p
-                            className={`text-sm ${
-                              lesson.isCompleted
-                                ? "text-green-600"
-                                : canAccess
-                                ? "text-blue-600"
-                                : "text-gray-500"
-                            }`}
-                          >
-                            {lesson.isCompleted
-                              ? "Completed"
-                              : isLocked
-                              ? "Locked - Complete previous lesson"
-                              : "Ready to start"}
+              {/* Display modules if they exist, otherwise show direct lessons */}
+              {course.modules && course.modules.length > 0 ? (
+                <div className="space-y-8">
+                  {course.modules.map((module, moduleIndex) => (
+                    <div key={module.id} className="space-y-4">
+                      {/* Module Header */}
+                      <div className="border-b border-gray-200 pb-2">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Module {module.order}: {module.name}
+                        </h3>
+                        {module.description && (
+                          <p className="text-sm text-gray-600 mt-1">
+                            {module.description}
                           </p>
-                        </div>
+                        )}
                       </div>
 
-                      {canAccess && (
-                        <Link
-                          href={`/courses/${course.id}/lessons/${lesson.id}`}
-                          className={`w-full sm:w-auto text-center px-4 py-2 rounded-lg font-medium ${
-                            lesson.isCompleted
-                              ? "bg-green-100 text-green-700 hover:bg-green-200"
-                              : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                          }`}
-                        >
-                          {lesson.isCompleted ? "Review" : "Start Lesson"}
-                        </Link>
-                      )}
+                      {/* Module Lessons */}
+                      <div className="space-y-4">
+                        {module.lessons.map((lesson, lessonIndex) => {
+                          const prevModule =
+                            moduleIndex > 0
+                              ? course.modules[moduleIndex - 1]
+                              : null;
+                          const prevModuleCompleted = prevModule
+                            ? prevModule.lessons.every((l) => l.isCompleted)
+                            : true;
+                          const prevLessonCompleted =
+                            lessonIndex > 0
+                              ? module.lessons[lessonIndex - 1].isCompleted
+                              : true;
+
+                          const canAccess =
+                            (moduleIndex === 0 && lessonIndex === 0) ||
+                            (lessonIndex === 0 && prevModuleCompleted) ||
+                            (lessonIndex > 0 && prevLessonCompleted);
+
+                          return (
+                            <div
+                              key={lesson.id}
+                              className={`bg-white rounded-lg shadow p-4 lg:p-6 border-l-4 ml-4 ${
+                                lesson.isCompleted
+                                  ? "border-green-500"
+                                  : canAccess
+                                  ? "border-blue-500"
+                                  : "border-gray-300"
+                              }`}
+                            >
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+                                <div className="flex items-center space-x-4">
+                                  <div
+                                    className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                                      lesson.isCompleted
+                                        ? "bg-green-500 text-white"
+                                        : canAccess
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-300 text-gray-600"
+                                    }`}
+                                  >
+                                    {lesson.isCompleted ? "✓" : lesson.order}
+                                  </div>
+
+                                  <div>
+                                    <h4
+                                      className={`text-lg font-semibold ${
+                                        canAccess
+                                          ? "text-gray-900"
+                                          : "text-gray-500"
+                                      }`}
+                                    >
+                                      {lesson.title}
+                                    </h4>
+                                    <p
+                                      className={`text-sm ${
+                                        lesson.isCompleted
+                                          ? "text-green-600"
+                                          : canAccess
+                                          ? "text-blue-600"
+                                          : "text-gray-500"
+                                      }`}
+                                    >
+                                      {lesson.isCompleted
+                                        ? "Completed"
+                                        : !canAccess
+                                        ? "Locked - Complete previous lesson"
+                                        : "Ready to start"}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {canAccess && (
+                                  <Link
+                                    href={`/courses/${course.id}/lessons/${lesson.id}`}
+                                    className={`w-full sm:w-auto text-center px-4 py-2 rounded-lg font-medium ${
+                                      lesson.isCompleted
+                                        ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                        : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                    }`}
+                                  >
+                                    {lesson.isCompleted
+                                      ? "Review"
+                                      : "Start Lesson"}
+                                  </Link>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+              ) : (
+                /* Fallback for courses without modules */
+                <div className="space-y-4">
+                  {course.lessons.map((lesson, index) => {
+                    const isLocked =
+                      index > 0 && !course.lessons[index - 1].isCompleted;
+                    const canAccess =
+                      index === 0 || course.lessons[index - 1].isCompleted;
+
+                    return (
+                      <div
+                        key={lesson.id}
+                        className={`bg-white rounded-lg shadow p-4 lg:p-6 border-l-4 ${
+                          lesson.isCompleted
+                            ? "border-green-500"
+                            : canAccess
+                            ? "border-blue-500"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+                          <div className="flex items-center space-x-4">
+                            <div
+                              className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                                lesson.isCompleted
+                                  ? "bg-green-500 text-white"
+                                  : canAccess
+                                  ? "bg-blue-500 text-white"
+                                  : "bg-gray-300 text-gray-600"
+                              }`}
+                            >
+                              {lesson.isCompleted ? "✓" : lesson.order}
+                            </div>
+
+                            <div>
+                              <h3
+                                className={`text-lg font-semibold ${
+                                  canAccess ? "text-gray-900" : "text-gray-500"
+                                }`}
+                              >
+                                {lesson.title}
+                              </h3>
+                              <p
+                                className={`text-sm ${
+                                  lesson.isCompleted
+                                    ? "text-green-600"
+                                    : canAccess
+                                    ? "text-blue-600"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                {lesson.isCompleted
+                                  ? "Completed"
+                                  : isLocked
+                                  ? "Locked - Complete previous lesson"
+                                  : "Ready to start"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {canAccess && (
+                            <Link
+                              href={`/courses/${course.id}/lessons/${lesson.id}`}
+                              className={`w-full sm:w-auto text-center px-4 py-2 rounded-lg font-medium ${
+                                lesson.isCompleted
+                                  ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                  : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                              }`}
+                            >
+                              {lesson.isCompleted ? "Review" : "Start Lesson"}
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
