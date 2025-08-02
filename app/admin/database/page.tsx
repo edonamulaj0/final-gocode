@@ -11,6 +11,9 @@ import {
   Edit,
   Trash2,
   FileText,
+  Layers,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 
 interface User {
@@ -47,9 +50,26 @@ interface Lesson {
   content: string;
   order: number;
   courseId: string;
+  moduleId?: string;
   isPublished: boolean;
   course: {
     name: string;
+  };
+}
+
+interface Module {
+  id: string;
+  name: string;
+  description?: string;
+  order: number;
+  courseId: string;
+  isPublished: boolean;
+  course: {
+    name: string;
+  };
+  _count: {
+    lessons: number;
+    practiceQuests: number;
   };
 }
 
@@ -69,11 +89,13 @@ interface DatabaseData {
   users: User[];
   courses: Course[];
   lessons: Lesson[];
+  modules: Module[];
   enrollments: Enrollment[];
   stats: {
     totalUsers: number;
     totalCourses: number;
     totalLessons: number;
+    totalModules: number;
     totalEnrollments: number;
   };
 }
@@ -82,9 +104,12 @@ type ViewMode =
   | "overview"
   | "courses"
   | "lessons"
+  | "modules"
   | "users"
   | "addCourse"
   | "editCourse"
+  | "addModule"
+  | "editModule"
   | "manageLessons";
 
 export default function AdminDatabase() {
@@ -94,7 +119,18 @@ export default function AdminDatabase() {
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("overview");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(
+    new Set()
+  );
+  const [courseModules, setCourseModules] = useState<{
+    [courseId: string]: Module[];
+  }>({});
+  const [moduleStructure, setModuleStructure] = useState<{
+    [courseId: string]: { [moduleId: string]: Lesson[] };
+  }>({});
 
   const [courseData, setCourseData] = useState({
     name: "",
@@ -111,6 +147,15 @@ export default function AdminDatabase() {
     title: "",
     content: "",
     order: 1,
+    moduleId: "",
+    isPublished: true,
+  });
+
+  const [moduleData, setModuleData] = useState({
+    name: "",
+    description: "",
+    order: 1,
+    courseId: "",
     isPublished: true,
   });
 
@@ -146,9 +191,86 @@ export default function AdminDatabase() {
     }
   };
 
+  const fetchModules = async (courseId?: string) => {
+    try {
+      const url = courseId
+        ? `/api/admin/modules?courseId=${courseId}`
+        : "/api/admin/modules";
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        setModules(data);
+      }
+    } catch (error) {
+      console.error("Error fetching modules:", error);
+    }
+  };
+
+  const fetchCourseStructure = async (courseId: string) => {
+    try {
+      // Fetch modules for the course
+      const modulesResponse = await fetch(
+        `/api/admin/modules?courseId=${courseId}`
+      );
+      if (modulesResponse.ok) {
+        const moduleData = await modulesResponse.json();
+        setCourseModules((prev) => ({ ...prev, [courseId]: moduleData }));
+
+        // For each module, fetch its lessons
+        const moduleStructureData: { [moduleId: string]: Lesson[] } = {};
+
+        for (const moduleItem of moduleData) {
+          try {
+            const lessonsResponse = await fetch(
+              `/api/admin/courses/${courseId}/lessons`
+            );
+            if (lessonsResponse.ok) {
+              const allLessons = await lessonsResponse.json();
+              // Filter lessons that belong to this module
+              const moduleLessons = allLessons.filter(
+                (lesson: Lesson) => lesson.moduleId === moduleItem.id
+              );
+              moduleStructureData[moduleItem.id] = moduleLessons;
+            }
+          } catch (error) {
+            console.error(
+              `Error fetching lessons for module ${moduleItem.id}:`,
+              error
+            );
+          }
+        }
+
+        setModuleStructure((prev) => ({
+          ...prev,
+          [courseId]: moduleStructureData,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching course structure:", error);
+    }
+  };
+
+  const toggleModuleExpansion = (moduleId: string) => {
+    setExpandedModules((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(moduleId)) {
+        newSet.delete(moduleId);
+      } else {
+        newSet.add(moduleId);
+      }
+      return newSet;
+    });
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (viewMode === "modules") {
+      fetchModules();
+    }
+  }, [viewMode]);
 
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -291,6 +413,7 @@ export default function AdminDatabase() {
           title: "",
           content: "",
           order: lessons.length + 1,
+          moduleId: "",
           isPublished: true,
         });
         await fetchLessons(selectedCourse.id);
@@ -330,6 +453,7 @@ export default function AdminDatabase() {
           title: "",
           content: "",
           order: lessons.length + 1,
+          moduleId: "",
           isPublished: true,
         });
         await fetchLessons(selectedCourse.id);
@@ -373,6 +497,108 @@ export default function AdminDatabase() {
     }
   };
 
+  // Module management functions
+  const handleCreateModule = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/admin/modules", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(moduleData),
+      });
+
+      if (response.ok) {
+        alert("Module created successfully!");
+        setModuleData({
+          name: "",
+          description: "",
+          order: 1,
+          courseId: "",
+          isPublished: true,
+        });
+        await fetchData();
+        await fetchModules();
+        setViewMode("modules");
+      } else {
+        alert("Failed to create module");
+      }
+    } catch (error) {
+      console.error("Error creating module:", error);
+      alert("Error creating module");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateModule = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedModule) return;
+    setLoading(true);
+
+    try {
+      const response = await fetch(`/api/admin/modules/${selectedModule.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(moduleData),
+      });
+
+      if (response.ok) {
+        alert("Module updated successfully!");
+        await fetchData();
+        await fetchModules();
+        setViewMode("modules");
+      } else {
+        alert("Failed to update module");
+      }
+    } catch (error) {
+      console.error("Error updating module:", error);
+      alert("Error updating module");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteModule = async (moduleId: string) => {
+    if (!confirm("Are you sure you want to delete this module?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/modules/${moduleId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("Module deleted successfully!");
+        await fetchData();
+        await fetchModules();
+      } else {
+        alert("Failed to delete module");
+      }
+    } catch (error) {
+      console.error("Error deleting module:", error);
+      alert("Error deleting module");
+    }
+  };
+
+  const startEditModule = (module: Module) => {
+    setSelectedModule(module);
+    setModuleData({
+      name: module.name,
+      description: module.description || "",
+      order: module.order,
+      courseId: module.courseId,
+      isPublished: module.isPublished,
+    });
+    setViewMode("editModule");
+  };
+
   const startEditCourse = (course: Course) => {
     setSelectedCourse(course);
     setCourseData({
@@ -391,6 +617,7 @@ export default function AdminDatabase() {
   const startManageLessons = (course: Course) => {
     setSelectedCourse(course);
     fetchLessons(course.id);
+    fetchCourseStructure(course.id); // Load modules for the dropdown
     setViewMode("manageLessons");
   };
 
@@ -400,6 +627,7 @@ export default function AdminDatabase() {
       title: lesson.title,
       content: lesson.content,
       order: lesson.order,
+      moduleId: lesson.moduleId || "",
       isPublished: lesson.isPublished,
     });
   };
@@ -410,6 +638,7 @@ export default function AdminDatabase() {
       title: "",
       content: "",
       order: lessons.length + 1,
+      moduleId: "",
       isPublished: true,
     });
   };
@@ -436,10 +665,13 @@ export default function AdminDatabase() {
           <h1 className="text-3xl font-bold text-black">
             {viewMode === "overview" && "Admin Dashboard"}
             {viewMode === "courses" && "Manage Courses"}
+            {viewMode === "modules" && "Manage Modules"}
             {viewMode === "lessons" && "Manage Lessons"}
             {viewMode === "users" && "Manage Users"}
             {viewMode === "addCourse" && "Add New Course"}
             {viewMode === "editCourse" && "Edit Course"}
+            {viewMode === "addModule" && "Add New Module"}
+            {viewMode === "editModule" && "Edit Module"}
             {viewMode === "manageLessons" &&
               `Manage Lessons - ${selectedCourse?.name}`}
           </h1>
@@ -468,7 +700,7 @@ export default function AdminDatabase() {
 
         {/* Navigation */}
         {viewMode === "overview" && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <button
               onClick={() => setViewMode("overview")}
               className={`p-4 rounded-lg border-2 transition-colors ${
@@ -487,6 +719,14 @@ export default function AdminDatabase() {
             >
               <BookOpen className="h-8 w-8 mx-auto mb-2 text-green-600" />
               <span className="block text-sm font-medium">Courses</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode("modules")}
+              className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 transition-colors"
+            >
+              <Layers className="h-8 w-8 mx-auto mb-2 text-indigo-600" />
+              <span className="block text-sm font-medium">Modules</span>
             </button>
 
             <button
@@ -523,7 +763,7 @@ export default function AdminDatabase() {
         {viewMode === "overview" && data && (
           <div>
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="p-5">
                   <div className="flex items-center">
@@ -557,6 +797,26 @@ export default function AdminDatabase() {
                         </dt>
                         <dd className="text-lg font-medium text-black">
                           {data.stats.totalCourses}
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="p-5">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <Layers className="h-8 w-8 text-indigo-600" />
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className="text-sm font-medium text-black truncate">
+                          Total Modules
+                        </dt>
+                        <dd className="text-lg font-medium text-black">
+                          {data.stats.totalModules}
                         </dd>
                       </dl>
                     </div>
@@ -627,6 +887,13 @@ export default function AdminDatabase() {
                     Manage Courses
                   </button>
                   <button
+                    onClick={() => setViewMode("modules")}
+                    className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-black bg-white hover:bg-gray-50"
+                  >
+                    <Layers className="h-4 w-4 mr-2" />
+                    Manage Modules
+                  </button>
+                  <button
                     onClick={() => setViewMode("lessons")}
                     className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-black bg-white hover:bg-gray-50"
                   >
@@ -694,7 +961,7 @@ export default function AdminDatabase() {
           </div>
         )}
 
-        {/* Courses View - Simplified without nested lessons */}
+        {/* Courses View - With Module Hierarchy */}
         {viewMode === "courses" && data && (
           <div>
             <div className="mb-6">
@@ -710,7 +977,7 @@ export default function AdminDatabase() {
             <div className="grid gap-6">
               {data.courses.map((course) => (
                 <div key={course.id} className="bg-white shadow rounded-lg p-6">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <span className="text-2xl">{course.icon}</span>
@@ -759,6 +1026,15 @@ export default function AdminDatabase() {
                         Edit
                       </button>
                       <button
+                        onClick={() => {
+                          fetchCourseStructure(course.id);
+                        }}
+                        className="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 transition-colors"
+                      >
+                        <Layers className="h-3 w-3 inline mr-1" />
+                        Load Structure
+                      </button>
+                      <button
                         onClick={() => startManageLessons(course)}
                         className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
                       >
@@ -774,8 +1050,249 @@ export default function AdminDatabase() {
                       </button>
                     </div>
                   </div>
+
+                  {/* Modules Section */}
+                  {courseModules[course.id] && (
+                    <div className="border-t pt-4">
+                      <h4 className="text-lg font-medium text-black mb-3">
+                        Modules ({courseModules[course.id]?.length || 0})
+                      </h4>
+                      <div className="space-y-3">
+                        {courseModules[course.id]
+                          ?.sort((a, b) => a.order - b.order)
+                          .map((moduleItem) => (
+                            <div
+                              key={moduleItem.id}
+                              className="border border-gray-200 rounded-lg overflow-hidden"
+                            >
+                              {/* Module Header */}
+                              <div
+                                className="bg-gray-50 p-3 cursor-pointer hover:bg-gray-100 transition-colors"
+                                onClick={() =>
+                                  toggleModuleExpansion(moduleItem.id)
+                                }
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-2">
+                                    {expandedModules.has(moduleItem.id) ? (
+                                      <ChevronDown className="h-4 w-4 text-gray-600" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4 text-gray-600" />
+                                    )}
+                                    <span className="font-medium text-black">
+                                      {moduleItem.order}. {moduleItem.name}
+                                    </span>
+                                    <span
+                                      className={`text-xs px-2 py-1 rounded-full ${
+                                        moduleItem.isPublished
+                                          ? "bg-green-100 text-black"
+                                          : "bg-red-100 text-black"
+                                      }`}
+                                    >
+                                      {moduleItem.isPublished
+                                        ? "Published"
+                                        : "Draft"}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                    <span>
+                                      {moduleStructure[course.id]?.[
+                                        moduleItem.id
+                                      ]?.length || 0}{" "}
+                                      lessons
+                                    </span>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        startEditModule(moduleItem);
+                                      }}
+                                      className="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600 transition-colors"
+                                    >
+                                      <Edit className="h-3 w-3" />
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteModule(moduleItem.id);
+                                      }}
+                                      className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700 transition-colors"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Module Content - Lessons */}
+                              {expandedModules.has(moduleItem.id) && (
+                                <div className="p-3 bg-white">
+                                  {moduleItem.description && (
+                                    <p className="text-sm text-gray-600 mb-3">
+                                      {moduleItem.description}
+                                    </p>
+                                  )}
+
+                                  <div className="space-y-2">
+                                    {moduleStructure[course.id]?.[moduleItem.id]
+                                      ?.length === 0 ? (
+                                      <p className="text-sm text-gray-500 italic">
+                                        No lessons in this module yet.
+                                      </p>
+                                    ) : (
+                                      moduleStructure[course.id]?.[
+                                        moduleItem.id
+                                      ]
+                                        ?.sort((a, b) => a.order - b.order)
+                                        .map((lesson) => (
+                                          <div
+                                            key={lesson.id}
+                                            className="flex items-center justify-between p-2 bg-gray-50 rounded border"
+                                          >
+                                            <div className="flex items-center space-x-2">
+                                              <span className="text-sm font-medium text-black">
+                                                {lesson.order}. {lesson.title}
+                                              </span>
+                                              {!lesson.isPublished && (
+                                                <span className="bg-red-100 text-black text-xs px-2 py-1 rounded-full">
+                                                  Draft
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div className="flex space-x-1">
+                                              <button
+                                                onClick={() => {
+                                                  setSelectedCourse(course);
+                                                  fetchLessons(course.id);
+                                                  setViewMode("manageLessons");
+                                                }}
+                                                className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 transition-colors"
+                                              >
+                                                <Edit className="h-3 w-3" />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        ))
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+
+                      {/* Add Module Button */}
+                      <button
+                        onClick={() => {
+                          setModuleData({
+                            name: "",
+                            description: "",
+                            order: (courseModules[course.id]?.length || 0) + 1,
+                            courseId: course.id,
+                            isPublished: true,
+                          });
+                          setViewMode("addModule");
+                        }}
+                        className="mt-3 bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700 transition-colors"
+                      >
+                        <Plus className="h-3 w-3 inline mr-1" />
+                        Add Module to {course.name}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Show structure button if not loaded */}
+                  {!courseModules[course.id] && (
+                    <div className="border-t pt-4">
+                      <button
+                        onClick={() => fetchCourseStructure(course.id)}
+                        className="bg-indigo-100 text-indigo-700 px-4 py-2 rounded hover:bg-indigo-200 transition-colors"
+                      >
+                        <Layers className="h-4 w-4 inline mr-2" />
+                        View Course Structure (Modules & Lessons)
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Modules View */}
+        {viewMode === "modules" && (
+          <div>
+            <div className="mb-6">
+              <button
+                onClick={() => setViewMode("addModule")}
+                className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors"
+              >
+                <Plus className="h-4 w-4 inline mr-2" />
+                Add New Module
+              </button>
+            </div>
+
+            <div className="grid gap-6">
+              {(data?.modules || modules).length === 0 ? (
+                <div className="bg-white shadow rounded-lg p-6">
+                  <p className="text-black">
+                    No modules found. Create your first module above.
+                  </p>
+                </div>
+              ) : (
+                (data?.modules || modules).map((module) => (
+                  <div
+                    key={module.id}
+                    className="bg-white shadow rounded-lg p-6"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-xl font-semibold text-black">
+                            {module.name}
+                          </h3>
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              module.isPublished
+                                ? "bg-green-100 text-black"
+                                : "bg-red-100 text-black"
+                            }`}
+                          >
+                            {module.isPublished ? "Published" : "Draft"}
+                          </span>
+                        </div>
+                        <p className="text-black mb-3">
+                          {module.description || "No description"}
+                        </p>
+                        <div className="flex space-x-4 text-sm text-black">
+                          <span>Course: {module.course.name}</span>
+                          <span>Lessons: {module._count?.lessons || 0}</span>
+                          <span>
+                            Practice Quests:{" "}
+                            {module._count?.practiceQuests || 0}
+                          </span>
+                          <span>Order: {module.order}</span>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2 ml-4">
+                        <button
+                          onClick={() => startEditModule(module)}
+                          className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition-colors"
+                        >
+                          <Edit className="h-3 w-3 inline mr-1" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteModule(module.id)}
+                          className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
+                        >
+                          <Trash2 className="h-3 w-3 inline mr-1" />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -1082,6 +1599,134 @@ export default function AdminDatabase() {
           </form>
         )}
 
+        {/* Add/Edit Module Form */}
+        {(viewMode === "addModule" || viewMode === "editModule") && (
+          <form
+            onSubmit={
+              viewMode === "addModule" ? handleCreateModule : handleUpdateModule
+            }
+            className="bg-white shadow rounded-lg p-6 space-y-6"
+          >
+            <div>
+              <label
+                htmlFor="moduleName"
+                className="block text-sm font-medium text-black"
+              >
+                Module Name
+              </label>
+              <input
+                type="text"
+                id="moduleName"
+                required
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                value={moduleData.name}
+                onChange={(e) =>
+                  setModuleData({ ...moduleData, name: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="moduleDescription"
+                className="block text-sm font-medium text-black"
+              >
+                Description
+              </label>
+              <textarea
+                id="moduleDescription"
+                rows={3}
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                value={moduleData.description}
+                onChange={(e) =>
+                  setModuleData({ ...moduleData, description: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="moduleCourse"
+                className="block text-sm font-medium text-black"
+              >
+                Course
+              </label>
+              <select
+                id="moduleCourse"
+                required
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                value={moduleData.courseId}
+                onChange={(e) =>
+                  setModuleData({ ...moduleData, courseId: e.target.value })
+                }
+              >
+                <option value="">Select a course...</option>
+                {data?.courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="moduleOrder"
+                  className="block text-sm font-medium text-black"
+                >
+                  Module Order
+                </label>
+                <input
+                  type="number"
+                  id="moduleOrder"
+                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                  value={moduleData.order}
+                  onChange={(e) =>
+                    setModuleData({
+                      ...moduleData,
+                      order: parseInt(e.target.value),
+                    })
+                  }
+                />
+              </div>
+
+              <div className="flex items-center pt-6">
+                <input
+                  type="checkbox"
+                  id="moduleIsPublished"
+                  className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                  checked={moduleData.isPublished}
+                  onChange={(e) =>
+                    setModuleData({
+                      ...moduleData,
+                      isPublished: e.target.checked,
+                    })
+                  }
+                />
+                <label
+                  htmlFor="moduleIsPublished"
+                  className="ml-2 text-sm text-black"
+                >
+                  Published (Module is visible to students)
+                </label>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            >
+              {loading
+                ? "Saving..."
+                : viewMode === "addModule"
+                ? "Create Module"
+                : "Update Module"}
+            </button>
+          </form>
+        )}
+
         {/* Manage Lessons View */}
         {viewMode === "manageLessons" && (
           <div className="space-y-8">
@@ -1132,6 +1777,33 @@ export default function AdminDatabase() {
                       setLessonData({ ...lessonData, content: e.target.value })
                     }
                   />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="moduleSelect"
+                    className="block text-sm font-medium text-black"
+                  >
+                    Module
+                  </label>
+                  <select
+                    id="moduleSelect"
+                    required
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                    value={lessonData.moduleId}
+                    onChange={(e) =>
+                      setLessonData({ ...lessonData, moduleId: e.target.value })
+                    }
+                  >
+                    <option value="">Select a module...</option>
+                    {(courseModules[selectedCourse?.id || ""] || [])
+                      .sort((a, b) => a.order - b.order)
+                      .map((moduleItem) => (
+                        <option key={moduleItem.id} value={moduleItem.id}>
+                          {moduleItem.order}. {moduleItem.name}
+                        </option>
+                      ))}
+                  </select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

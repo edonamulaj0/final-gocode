@@ -3,6 +3,15 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+// Type assertion for module access
+interface ExtendedPrismaClient {
+  module: {
+    findMany: (args?: unknown) => Promise<unknown[]>;
+  };
+}
+
+const extendedPrisma = prisma as typeof prisma & ExtendedPrismaClient;
+
 // This endpoint is for admin access only - requires authentication
 export async function GET() {
   try {
@@ -103,15 +112,35 @@ export async function GET() {
       },
     });
 
+    // Get all modules
+    const modules = await extendedPrisma.module.findMany({
+      include: {
+        course: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            lessons: true,
+            practiceQuests: true,
+          },
+        },
+      },
+      orderBy: [{ courseId: "asc" }, { order: "asc" }],
+    });
+
     return NextResponse.json({
       users: users,
       courses: courses,
       lessons: lessons,
+      modules: modules,
       enrollments: enrollments,
       stats: {
         totalUsers: users.length,
         totalCourses: courses.length,
         totalLessons: lessons.length,
+        totalModules: modules.length,
         totalEnrollments: enrollments.length,
       },
     });
