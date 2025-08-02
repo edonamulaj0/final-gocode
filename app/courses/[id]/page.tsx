@@ -160,7 +160,9 @@ export default function CourseDetail({
         alert("Successfully enrolled in the course!");
       } else {
         const errorData = await response.json();
-        alert(`Failed to enroll in course: ${errorData.error || 'Unknown error'}`);
+        alert(
+          `Failed to enroll in course: ${errorData.error || "Unknown error"}`
+        );
       }
     } catch (error) {
       console.error("Error enrolling:", error);

@@ -156,7 +156,7 @@ const GoCodeWebsite = () => {
         alert("Successfully enrolled in the course!");
       } else {
         const errorData = await response.json();
-        alert(`Failed to enroll: ${errorData.error || 'Unknown error'}`);
+        alert(`Failed to enroll: ${errorData.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error enrolling in course:", error);
@@ -878,14 +878,20 @@ const GoCodeWebsite = () => {
                           </button>
                         ) : null}
                         <button
-                          disabled={!isUnlocked || !session || !course.isEnrolled}
+                          disabled={
+                            !isUnlocked || !session || !course.isEnrolled
+                          }
                           onClick={() => {
                             if (!session) {
-                              alert("Please log in to access practice problems.");
+                              alert(
+                                "Please log in to access practice problems."
+                              );
                               return;
                             }
                             if (!course.isEnrolled) {
-                              alert("Please enroll in the course first to access practice problems.");
+                              alert(
+                                "Please enroll in the course first to access practice problems."
+                              );
                               return;
                             }
                             setSelectedCourse(course);
