@@ -156,6 +156,7 @@ export default function LessonPage({
       );
 
       if (response.ok) {
+        // Update the current lesson state
         setLessonData((prev) =>
           prev
             ? {
@@ -164,6 +165,16 @@ export default function LessonPage({
               }
             : null
         );
+
+        // Refresh the sidebar lessons to show updated completion status
+        const courseResponse = await fetch(`/api/courses/${resolvedParams.id}`);
+        if (courseResponse.ok) {
+          const courseData = await courseResponse.json();
+          setAllLessons(courseData.lessons || []);
+        }
+
+        // Signal to the course page that it needs to refresh its data
+        sessionStorage.setItem(`course-${resolvedParams.id}-refresh`, "true");
       }
     } catch (error) {
       console.error("Error marking lesson as complete:", error);

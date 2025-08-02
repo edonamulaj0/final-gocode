@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -106,6 +106,53 @@ export default function CourseDetail({
     fetchCourse();
   }, [resolvedParams, session]);
 
+  const refetchCourse = useCallback(async () => {
+    if (!resolvedParams) return;
+
+    try {
+      const response = await fetch(`/api/courses/${resolvedParams.id}`);
+      if (response.ok) {
+        const courseData = await response.json();
+        setCourse(courseData);
+      }
+    } catch (error) {
+      console.error("Error fetching course:", error);
+    }
+  }, [resolvedParams]);
+
+  // Check for refresh signal when component mounts or when page becomes visible
+  useEffect(() => {
+    if (!resolvedParams) return;
+
+    const checkForRefresh = () => {
+      const needsRefresh = sessionStorage.getItem(
+        `course-${resolvedParams.id}-refresh`
+      );
+      if (needsRefresh === "true") {
+        // Clear the flag
+        sessionStorage.removeItem(`course-${resolvedParams.id}-refresh`);
+        // Refresh the course data
+        refetchCourse();
+      }
+    };
+
+    // Check immediately
+    checkForRefresh();
+
+    // Also check when the page becomes visible (e.g., returning from lesson)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkForRefresh();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [resolvedParams, refetchCourse]);
+
   // Set initial sidebar state based on screen size
   useEffect(() => {
     const checkScreenSize = () => {
@@ -123,20 +170,6 @@ export default function CourseDetail({
     // Cleanup event listener
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
-
-  const refetchCourse = async () => {
-    if (!resolvedParams) return;
-
-    try {
-      const response = await fetch(`/api/courses/${resolvedParams.id}`);
-      if (response.ok) {
-        const courseData = await response.json();
-        setCourse(courseData);
-      }
-    } catch (error) {
-      console.error("Error fetching course:", error);
-    }
-  };
 
   const handleEnroll = async () => {
     if (!session || !resolvedParams) {

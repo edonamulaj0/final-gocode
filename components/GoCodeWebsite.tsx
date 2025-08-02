@@ -153,14 +153,16 @@ const GoCodeWebsite = () => {
       });
       if (response.ok) {
         await fetchCourses(); // Refresh courses data
-        alert("Successfully enrolled in the course!");
+        // Return success for programmatic use, don't show alert
+        return { success: true };
       } else {
         const errorData = await response.json();
-        alert(`Failed to enroll: ${errorData.error || "Unknown error"}`);
+        console.error("Failed to enroll:", errorData.error);
+        return { success: false, error: errorData.error || "Unknown error" };
       }
     } catch (error) {
       console.error("Error enrolling in course:", error);
-      alert("Error enrolling in course. Please try again.");
+      return { success: false, error: "Network error. Please try again." };
     }
   };
 
@@ -624,11 +626,17 @@ const GoCodeWebsite = () => {
                       disabled={!isUnlocked || !session}
                       onClick={async () => {
                         if (!session) {
-                          alert("Please log in first.");
+                          setCurrentPage("signin");
                           return;
                         }
                         if (!course.isEnrolled) {
-                          await enrollInCourse(course.id);
+                          const result = await enrollInCourse(course.id);
+                          if (result.success) {
+                            // Navigate to course after successful enrollment
+                            router.push(`/courses/${course.id}`);
+                          } else {
+                            alert(`Failed to enroll: ${result.error}`);
+                          }
                         } else {
                           router.push(`/courses/${course.id}`);
                         }
@@ -870,7 +878,12 @@ const GoCodeWebsite = () => {
                       <div className="flex flex-col md:flex-row gap-2 mt-4 md:mt-0 w-full md:w-auto">
                         {!course.isEnrolled && session ? (
                           <button
-                            onClick={() => enrollInCourse(course.id)}
+                            onClick={async () => {
+                              const result = await enrollInCourse(course.id);
+                              if (!result.success) {
+                                alert(`Failed to enroll: ${result.error}`);
+                              }
+                            }}
                             className="flex items-center justify-center space-x-2 px-4 md:px-6 py-3 rounded-lg font-semibold transition-colors bg-green-600 text-white hover:bg-green-700"
                           >
                             <UserPlus size={18} />
@@ -878,36 +891,41 @@ const GoCodeWebsite = () => {
                           </button>
                         ) : null}
                         <button
-                          disabled={
-                            !isUnlocked || !session || !course.isEnrolled
-                          }
-                          onClick={() => {
+                          disabled={!isUnlocked}
+                          onClick={async () => {
                             if (!session) {
-                              alert(
-                                "Please log in to access practice problems."
-                              );
+                              // Navigate to sign-in page instead of showing alert
+                              setCurrentPage("signin");
                               return;
                             }
                             if (!course.isEnrolled) {
-                              alert(
-                                "Please enroll in the course first to access practice problems."
-                              );
+                              // Enroll the user and then open practice
+                              const result = await enrollInCourse(course.id);
+                              if (result.success) {
+                                // After successful enrollment, the course data will be refreshed
+                                // and they can access practice problems
+                                setSelectedCourse(course);
+                              } else {
+                                alert(`Failed to enroll: ${result.error}`);
+                              }
                               return;
                             }
                             setSelectedCourse(course);
                           }}
                           className={`flex items-center justify-center space-x-2 px-4 md:px-6 py-3 rounded-lg font-semibold transition-colors ${
-                            isUnlocked && session && course.isEnrolled
-                              ? "bg-blue-600 text-white hover:bg-blue-700"
+                            isUnlocked && session
+                              ? course.isEnrolled
+                                ? "bg-blue-600 text-white hover:bg-blue-700"
+                                : "bg-green-600 text-white hover:bg-green-700"
                               : "bg-slate-200 text-slate-400 cursor-not-allowed"
                           }`}
                         >
                           <Play size={18} />
                           <span>
                             {!session
-                              ? "Login Required"
+                              ? "Login to Practice"
                               : !course.isEnrolled
-                              ? "Enroll to Practice"
+                              ? "Enroll & Practice"
                               : "Practice Problems"}
                           </span>
                         </button>
