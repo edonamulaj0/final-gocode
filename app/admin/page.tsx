@@ -3,6 +3,9 @@
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import GradingPage from "@/components/pages/GradingPage";
+import StudentClassManagement from "@/components/admin/StudentClassManagement";
+import CourseModuleManagement from "@/components/admin/CourseModuleManagement";
+import StudentProgressMonitoring from "@/components/admin/StudentProgressMonitoring";
 
 export default function AdminDashboard() {
   const { data: session } = useSession();
@@ -38,7 +41,7 @@ export default function AdminDashboard() {
                     activeTab === "grading"
                       ? "border-indigo-500 text-gray-900"
                       : "border-transparent text-gray-500 hover:text-gray-700"
-                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
+                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors`}
                 >
                   Grading
                 </button>
@@ -48,9 +51,19 @@ export default function AdminDashboard() {
                     activeTab === "courses"
                       ? "border-indigo-500 text-gray-900"
                       : "border-transparent text-gray-500 hover:text-gray-700"
-                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
+                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors`}
                 >
                   Course Management
+                </button>
+                <button
+                  onClick={() => setActiveTab("classes")}
+                  className={`${
+                    activeTab === "classes"
+                      ? "border-indigo-500 text-gray-900"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors`}
+                >
+                  Student Classes
                 </button>
                 <button
                   onClick={() => setActiveTab("students")}
@@ -58,7 +71,7 @@ export default function AdminDashboard() {
                     activeTab === "students"
                       ? "border-indigo-500 text-gray-900"
                       : "border-transparent text-gray-500 hover:text-gray-700"
-                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
+                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors`}
                 >
                   Student Progress
                 </button>
@@ -75,47 +88,13 @@ export default function AdminDashboard() {
 
       {/* Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {activeTab === "grading" && <GradingPage />}
-        {activeTab === "courses" && <CourseManagement />}
-        {activeTab === "students" && <StudentProgress />}
+        <div className="px-4 py-6 sm:px-0">
+          {activeTab === "grading" && <GradingPage />}
+          {activeTab === "courses" && <CourseModuleManagement />}
+          {activeTab === "classes" && <StudentClassManagement />}
+          {activeTab === "students" && <StudentProgressMonitoring />}
+        </div>
       </main>
-    </div>
-  );
-}
-
-function CourseManagement() {
-  return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <h2 className="text-2xl font-bold mb-4">Course Management</h2>
-      <p className="text-gray-600">
-        Course management features will be implemented here. This will include:
-      </p>
-      <ul className="mt-4 space-y-2 text-gray-600">
-        <li>• Create and edit courses</li>
-        <li>• Manage course modules</li>
-        <li>• Add lessons, practice questions, and exams</li>
-        <li>• Create projects and assignments</li>
-        <li>• Set up final exams</li>
-      </ul>
-    </div>
-  );
-}
-
-function StudentProgress() {
-  return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <h2 className="text-2xl font-bold mb-4">Student Progress</h2>
-      <p className="text-gray-600">
-        Student progress monitoring features will be implemented here. This will
-        include:
-      </p>
-      <ul className="mt-4 space-y-2 text-gray-600">
-        <li>• View all student enrollments</li>
-        <li>• Monitor course completion rates</li>
-        <li>• Track individual student progress</li>
-        <li>• Generate progress reports</li>
-        <li>• View grade summaries</li>
-      </ul>
     </div>
   );
 }
