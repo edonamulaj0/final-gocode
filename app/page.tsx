@@ -50,7 +50,7 @@ export default function Home() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch("/api/courses");
+      const response = await fetch("/api/admin/courses");
       if (response.ok) {
         const data = await response.json();
         setCourses(data);
