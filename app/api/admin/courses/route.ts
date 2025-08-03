@@ -1,35 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ courseId: string }> }
+) {
   try {
-    const session = await getServerSession(authOptions);
+    const { courseId } = await params;
+    const body = await request.json();
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const courses = await prisma.course.findMany({
-      orderBy: { order: "asc" },
-      include: {
-        modules: {
-          select: {
-            id: true,
-            name: true,
-            order: true,
-          },
-          orderBy: { order: "asc" },
-        },
-      },
+    const updatedCourse = await prisma.course.update({
+      where: { id: courseId },
+      data: body,
     });
 
-    return NextResponse.json(courses);
+    return NextResponse.json(updatedCourse);
   } catch (error) {
-    console.error("Failed to fetch courses:", error);
+    console.error("Error updating course:", error);
     return NextResponse.json(
-      { error: "Failed to fetch courses" },
+      { error: "Failed to update course" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ courseId: string }> }
+) {
+  try {
+    const { courseId } = await params;
+
+    await prisma.course.delete({
+      where: { id: courseId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting course:", error);
+    return NextResponse.json(
+      { error: "Failed to delete course" },
       { status: 500 }
     );
   }
@@ -37,54 +47,27 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const body = await request.json();
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const {
-      name,
-      description,
-      icon = "📚",
-      duration = "4 weeks",
-      difficulty = "Beginner",
-    } = await request.json();
-
-    if (!name) {
-      return NextResponse.json(
-        { error: "Course name is required" },
-        { status: 400 }
-      );
-    }
-
-    // Get the next order number - keep as number
     const lastCourse = await prisma.course.findFirst({
       orderBy: { order: "desc" },
     });
 
-    // Keep as number since schema expects number
     const nextOrder = (lastCourse?.order || 0) + 1;
 
-    const course = await prisma.course.create({
+    const newCourse = await prisma.course.create({
       data: {
-        name,
-        description: description || "",
-        icon,
-        order: nextOrder, // Number
-        duration,
-        difficulty,
-        lessons: 0, // Number (starting with 0 lessons)
+        ...body,
+        order: nextOrder,
       },
     });
 
-    return NextResponse.json(course, { status: 201 });
+    return NextResponse.json(newCourse);
   } catch (error) {
-    console.error("Failed to create course:", error);
+    console.error("Error creating course:", error);
     return NextResponse.json(
       { error: "Failed to create course" },
       { status: 500 }
-  
     );
   }
 }

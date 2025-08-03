@@ -9,12 +9,12 @@ export async function PUT(
     const { lessonId } = await params;
     const body = await request.json();
 
-    const lesson = await prisma.lesson.update({
+    const updatedLesson = await prisma.lesson.update({
       where: { id: lessonId },
       data: body,
     });
 
-    return NextResponse.json(lesson);
+    return NextResponse.json(updatedLesson);
   } catch (error) {
     console.error("Error updating lesson:", error);
     return NextResponse.json(
@@ -44,6 +44,3 @@ export async function DELETE(
     );
   }
 }
-
-
-

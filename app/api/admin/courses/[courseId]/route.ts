@@ -9,12 +9,12 @@ export async function PUT(
     const { courseId } = await params;
     const body = await request.json();
 
-    const course = await prisma.course.update({
+    const updatedCourse = await prisma.course.update({
       where: { id: courseId },
       data: body,
     });
 
-    return NextResponse.json(course);
+    return NextResponse.json(updatedCourse);
   } catch (error) {
     console.error("Error updating course:", error);
     return NextResponse.json(
@@ -40,6 +40,33 @@ export async function DELETE(
     console.error("Error deleting course:", error);
     return NextResponse.json(
       { error: "Failed to delete course" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    const lastCourse = await prisma.course.findFirst({
+      orderBy: { order: "desc" },
+    });
+
+    const nextOrder = (lastCourse?.order || 0) + 1;
+
+    const newCourse = await prisma.course.create({
+      data: {
+        ...body,
+        order: nextOrder,
+      },
+    });
+
+    return NextResponse.json(newCourse);
+  } catch (error) {
+    console.error("Error creating course:", error);
+    return NextResponse.json(
+      { error: "Failed to create course" },
       { status: 500 }
     );
   }

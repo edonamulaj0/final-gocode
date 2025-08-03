@@ -172,50 +172,93 @@ export default function ComprehensiveCourseManager() {
   const handleSave = async () => {
     try {
       if (editMode === "course") {
-        const response = await fetch(
-          `/api/admin/courses/${editData.id || ""}`,
-          {
-            method: editData.id ? "PUT" : "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(editData),
-          }
-        );
+        const url = editData.id
+          ? `/api/admin/courses/${editData.id}`
+          : `/api/admin/courses`;
+
+        const response = await fetch(url, {
+          method: editData.id ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editData),
+        });
+
         if (response.ok) {
-          fetchCoursesWithContent();
+          await fetchCoursesWithContent();
+        } else {
+          const errorData = await response.json();
+          console.error("Error saving course:", errorData);
+          alert(`Error saving course: ${errorData.error || "Unknown error"}`);
         }
       } else if (editMode === "module" && selectedCourse) {
-        const response = await fetch(
-          `/api/admin/courses/${selectedCourse.id}/modules/${
-            editData.id || ""
-          }`,
-          {
-            method: editData.id ? "PUT" : "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(editData),
-          }
-        );
+        const url = editData.id
+          ? `/api/admin/modules/${editData.id}`
+          : `/api/admin/courses/${selectedCourse.id}/modules`;
+
+        const response = await fetch(url, {
+          method: editData.id ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editData),
+        });
+
         if (response.ok) {
-          fetchCoursesWithContent();
+          await fetchCoursesWithContent();
+          // Update selected course after refresh
+          const refreshedCourses = await fetch(
+            "/api/admin/courses/detailed"
+          ).then((res) => res.json());
+          const refreshedCourse = refreshedCourses.find(
+            (c: Course) => c.id === selectedCourse.id
+          );
+          if (refreshedCourse) {
+            setSelectedCourse(refreshedCourse);
+          }
+        } else {
+          const errorData = await response.json();
+          console.error("Error saving module:", errorData);
+          alert(`Error saving module: ${errorData.error || "Unknown error"}`);
         }
       } else if (editMode === "lesson" && selectedModule) {
-        const response = await fetch(
-          `/api/admin/modules/${selectedModule.id}/lessons/${
-            editData.id || ""
-          }`,
-          {
-            method: editData.id ? "PUT" : "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(editData),
-          }
-        );
+        const url = editData.id
+          ? `/api/admin/lessons/${editData.id}`
+          : `/api/admin/modules/${selectedModule.id}/lessons`;
+
+        const response = await fetch(url, {
+          method: editData.id ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editData),
+        });
+
         if (response.ok) {
-          fetchCoursesWithContent();
+          await fetchCoursesWithContent();
+          // Update selected course and module after refresh
+          if (selectedCourse) {
+            const refreshedCourses = await fetch(
+              "/api/admin/courses/detailed"
+            ).then((res) => res.json());
+            const refreshedCourse = refreshedCourses.find(
+              (c: Course) => c.id === selectedCourse.id
+            );
+            if (refreshedCourse) {
+              setSelectedCourse(refreshedCourse);
+              const refreshedModule = refreshedCourse.modules.find(
+                (m: Module) => m.id === selectedModule.id
+              );
+              if (refreshedModule) {
+                setSelectedModule(refreshedModule);
+              }
+            }
+          }
+        } else {
+          const errorData = await response.json();
+          console.error("Error saving lesson:", errorData);
+          alert(`Error saving lesson: ${errorData.error || "Unknown error"}`);
         }
       }
       setEditMode(null);
       setEditData({});
     } catch (error) {
       console.error("Error saving:", error);
+      alert("Error saving. Please try again.");
     }
   };
 
@@ -233,16 +276,22 @@ export default function ComprehensiveCourseManager() {
 
       const response = await fetch(url, { method: "DELETE" });
       if (response.ok) {
-        fetchCoursesWithContent();
+        await fetchCoursesWithContent();
         if (type === "course" && selectedCourse?.id === id) {
           setSelectedCourse(null);
+          setSelectedModule(null);
         }
         if (type === "module" && selectedModule?.id === id) {
           setSelectedModule(null);
         }
+      } else {
+        const errorData = await response.json();
+        console.error(`Error deleting ${type}:`, errorData);
+        alert(`Error deleting ${type}: ${errorData.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error(`Error deleting ${type}:`, error);
+      alert(`Error deleting ${type}. Please try again.`);
     }
   };
 
@@ -560,7 +609,7 @@ export default function ComprehensiveCourseManager() {
                   onChange={(e) =>
                     setEditData({ ...editData, name: e.target.value })
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black border px-3 py-2"
                 />
               </div>
 
@@ -574,7 +623,7 @@ export default function ComprehensiveCourseManager() {
                     setEditData({ ...editData, description: e.target.value })
                   }
                   rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black border px-3 py-2"
                 />
               </div>
 
@@ -591,7 +640,7 @@ export default function ComprehensiveCourseManager() {
                         onChange={(e) =>
                           setEditData({ ...editData, icon: e.target.value })
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black border px-3 py-2"
                       />
                     </div>
                     <div>
@@ -604,7 +653,7 @@ export default function ComprehensiveCourseManager() {
                         onChange={(e) =>
                           setEditData({ ...editData, duration: e.target.value })
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black border px-3 py-2"
                       />
                     </div>
                   </div>
@@ -617,7 +666,7 @@ export default function ComprehensiveCourseManager() {
                       onChange={(e) =>
                         setEditData({ ...editData, difficulty: e.target.value })
                       }
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black border px-3 py-2"
                     >
                       <option value="Beginner">Beginner</option>
                       <option value="Intermediate">Intermediate</option>
@@ -638,7 +687,7 @@ export default function ComprehensiveCourseManager() {
                       onChange={(e) =>
                         setEditData({ ...editData, type: e.target.value })
                       }
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black border px-3 py-2"
                     >
                       <option value="theory">Theory</option>
                       <option value="practice">Practice</option>
@@ -656,7 +705,7 @@ export default function ComprehensiveCourseManager() {
                         setEditData({ ...editData, content: e.target.value })
                       }
                       rows={6}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black border px-3 py-2"
                       placeholder="Lesson content..."
                     />
                   </div>
