@@ -1,45 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ courseId: string }> }
-) {
+export async function GET() {
   try {
-    const { courseId } = await params;
-    const body = await request.json();
-
-    const updatedCourse = await prisma.course.update({
-      where: { id: courseId },
-      data: body,
+    const courses = await prisma.course.findMany({
+      orderBy: { order: "asc" },
     });
 
-    return NextResponse.json(updatedCourse);
+    return NextResponse.json(courses);
   } catch (error) {
-    console.error("Error updating course:", error);
+    console.error("Error fetching courses:", error);
     return NextResponse.json(
-      { error: "Failed to update course" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ courseId: string }> }
-) {
-  try {
-    const { courseId } = await params;
-
-    await prisma.course.delete({
-      where: { id: courseId },
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting course:", error);
-    return NextResponse.json(
-      { error: "Failed to delete course" },
+      {
+        error: "Failed to fetch courses",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -49,6 +24,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    console.log("Creating course with data:", body);
+
     const lastCourse = await prisma.course.findFirst({
       orderBy: { order: "desc" },
     });
@@ -57,16 +34,25 @@ export async function POST(request: NextRequest) {
 
     const newCourse = await prisma.course.create({
       data: {
-        ...body,
+        name: body.name,
+        description: body.description || "",
+        icon: body.icon || "📚",
+        duration: body.duration || "4 weeks",
+        difficulty: body.difficulty || "Beginner",
         order: nextOrder,
+        isUnlocked: false, // Add this field that was missing
       },
     });
 
+    console.log("Created course:", newCourse);
     return NextResponse.json(newCourse);
   } catch (error) {
     console.error("Error creating course:", error);
     return NextResponse.json(
-      { error: "Failed to create course" },
+      {
+        error: "Failed to create course",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

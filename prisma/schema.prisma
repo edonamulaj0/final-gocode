@@ -41,17 +41,16 @@ model Course {
   description String
   icon        String
   duration    String
-  lessons     Int
   difficulty  String
-  order       Int // For sequential unlocking
-  isUnlocked  Boolean  @default(false) // Manual unlock control
+  order       Int
+  isUnlocked  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
+  // Relations - KEEP ALL OF THEM
   enrollments CourseEnrollment[]
   modules     Module[]
-  lessons_rel Lesson[] // Keep for backward compatibility during migration
+  lessons     Lesson[] // Keep this! Important for direct course-lesson queries
   practices   PracticeQuest[]
   projects    Project[]
   finalExams  FinalExam[]
@@ -85,7 +84,8 @@ model Module {
 model Lesson {
   id          String   @id @default(cuid())
   title       String
-  content     String // JSON or markdown content
+  content     String   @default("") // JSON or markdown content
+  type        String   @default("theory") // Add this field
   order       Int
   courseId    String? // Make optional for backward compatibility
   moduleId    String? // New field for module relationship

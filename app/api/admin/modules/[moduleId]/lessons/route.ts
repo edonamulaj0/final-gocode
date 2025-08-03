@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ moduleId: string }> }
+) {
+  try {
+    const { moduleId } = await params;
+    const lessons = await prisma.lesson.findMany({
+      where: { moduleId },
+      orderBy: { order: "asc" },
+    });
+    return NextResponse.json(lessons);
+  } catch{
+    return NextResponse.json(
+      { error: "Failed to fetch lessons" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ moduleId: string }> }
@@ -14,19 +33,19 @@ export async function POST(
       orderBy: { order: "desc" },
     });
 
-    const nextOrder = (lastLesson?.order || 0) + 1;
-
     const newLesson = await prisma.lesson.create({
       data: {
-        ...body,
+        title: body.name,
+        content: body.content || "",
+        type: body.type || "theory",
         moduleId,
-        order: nextOrder,
+        order: (lastLesson?.order || 0) + 1,
+        isPublished: true,
       },
     });
 
     return NextResponse.json(newLesson);
-  } catch (error) {
-    console.error("Error creating lesson:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to create lesson" },
       { status: 500 }

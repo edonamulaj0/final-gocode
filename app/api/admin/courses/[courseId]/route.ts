@@ -1,6 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ courseId: string }> } // Match filename
+) {
+  try {
+    const { courseId } = await params; // Use courseId
+
+    const course = await prisma.course.findUnique({
+      where: { id: courseId }, // Map to id for Prisma
+      include: {
+        lessons: { orderBy: { order: "asc" } },
+        modules: {
+          orderBy: { order: "asc" },
+          include: {
+            lessons: { orderBy: { order: "asc" } },
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(course);
+  } catch (error) {
+    console.error("Error fetching course:", error);
+    return NextResponse.json(
+      {
+        error: "Failed to fetch course",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ courseId: string }> }
@@ -11,14 +48,23 @@ export async function PUT(
 
     const updatedCourse = await prisma.course.update({
       where: { id: courseId },
-      data: body,
+      data: {
+        name: body.name,
+        description: body.description,
+        icon: body.icon,
+        duration: body.duration,
+        difficulty: body.difficulty,
+      },
     });
 
     return NextResponse.json(updatedCourse);
   } catch (error) {
     console.error("Error updating course:", error);
     return NextResponse.json(
-      { error: "Failed to update course" },
+      {
+        error: "Failed to update course",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -39,34 +85,10 @@ export async function DELETE(
   } catch (error) {
     console.error("Error deleting course:", error);
     return NextResponse.json(
-      { error: "Failed to delete course" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-
-    const lastCourse = await prisma.course.findFirst({
-      orderBy: { order: "desc" },
-    });
-
-    const nextOrder = (lastCourse?.order || 0) + 1;
-
-    const newCourse = await prisma.course.create({
-      data: {
-        ...body,
-        order: nextOrder,
+      {
+        error: "Failed to delete course",
+        details: error instanceof Error ? error.message : String(error),
       },
-    });
-
-    return NextResponse.json(newCourse);
-  } catch (error) {
-    console.error("Error creating course:", error);
-    return NextResponse.json(
-      { error: "Failed to create course" },
       { status: 500 }
     );
   }

@@ -42,7 +42,6 @@ async function main() {
         "Learn Python from basics to advanced concepts including data structures, OOP, and file handling.",
       icon: "🐍",
       duration: "8 weeks",
-      lessons: 24,
       difficulty: "Beginner",
       order: 1,
       isUnlocked: true, // First course is unlocked by default
@@ -56,7 +55,6 @@ async function main() {
         "Master Java programming with object-oriented concepts, collections, and enterprise development.",
       icon: "☕",
       duration: "10 weeks",
-      lessons: 30,
       difficulty: "Intermediate",
       order: 2,
       isUnlocked: false, // Locked by default, you can unlock it manually
@@ -69,16 +67,6 @@ async function main() {
       name: "Python Basics",
       description: "Learn the fundamentals of Python programming.",
       order: 1,
-      courseId: pythonCourse.id,
-      isPublished: true,
-    },
-  });
-
-  const module2 = await prisma.module.create({
-    data: {
-      name: "Object-Oriented Programming",
-      description: "Master OOP concepts in Python.",
-      order: 2,
       courseId: pythonCourse.id,
       isPublished: true,
     },

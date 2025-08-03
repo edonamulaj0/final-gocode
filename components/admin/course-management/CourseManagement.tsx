@@ -4,12 +4,15 @@ import React, { useState } from "react";
 import CourseStats from "./CourseStats";
 import { useCourseManagement } from "./useCourseManagement";
 import ComprehensiveCourseManager from "./ComprehensiveCourseManager";
+import ManualCourseManager from "./ManualCourseManager";
 
 export default function CourseManagement() {
   const { courses, handleDeleteCourse, openAddModal, openEditModal } =
     useCourseManagement();
 
-  const [view, setView] = useState<"overview" | "detailed">("overview");
+  const [view, setView] = useState<"overview" | "detailed" | "manual">(
+    "overview"
+  );
 
   return (
     <div className="space-y-6">
@@ -27,6 +30,16 @@ export default function CourseManagement() {
             Overview
           </button>
           <button
+            onClick={() => setView("manual")}
+            className={`px-4 py-2 rounded ${
+              view === "manual"
+                ? "bg-gray-200 text-black"
+                : "bg-white text-black border border-gray-300"
+            }`}
+          >
+            Manual Management
+          </button>
+          <button
             onClick={() => setView("detailed")}
             className={`px-4 py-2 rounded ${
               view === "detailed"
@@ -34,7 +47,7 @@ export default function CourseManagement() {
                 : "bg-white text-black border border-gray-300"
             }`}
           >
-            Detailed Management
+            Advanced
           </button>
         </div>
       </div>
@@ -87,6 +100,8 @@ export default function CourseManagement() {
             </div>
           </div>
         </>
+      ) : view === "manual" ? (
+        <ManualCourseManager />
       ) : (
         <ComprehensiveCourseManager />
       )}
