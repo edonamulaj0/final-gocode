@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { StudentLevel, Student } from "@/types/student";
 
 interface StudentProgress {
@@ -37,9 +37,45 @@ interface LevelStats {
   topPerformers: Student[];
 }
 
+// Add interfaces for API response types
+interface ApiStudentProgress {
+  studentId: string;
+  student: {
+    id: string;
+    name: string;
+    email: string;
+    currentLevel: StudentLevel;
+    enrolledAt: string; // API returns ISO string
+  };
+  courseProgress: ApiCourseProgress[];
+  overallCompletion: number;
+  currentStreak: number;
+  totalTimeSpent: number;
+}
+
+interface ApiCourseProgress {
+  courseId: string;
+  courseName: string;
+  completedModules: number;
+  totalAccessibleModules: number;
+  completionPercentage: number;
+  lastAccessed: string; // API returns ISO string
+  grades: ApiModuleGrade[];
+}
+
+interface ApiModuleGrade {
+  moduleId: string;
+  moduleName: string;
+  grade: number;
+  maxGrade: number;
+  completedAt: string; // API returns ISO string
+}
+
 export default function StudentProgressMonitoring() {
   const [progressData, setProgressData] = useState<StudentProgress[]>([]);
   const [levelStats, setLevelStats] = useState<LevelStats[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<StudentLevel | "ALL">(
     "ALL"
   );
@@ -49,106 +85,60 @@ export default function StudentProgressMonitoring() {
     "month"
   );
 
-  const levels: StudentLevel[] = ["B2", "B3", "M1", "M2"];
+  // Memoize levels array to prevent unnecessary re-renders
+  const levels = useMemo<StudentLevel[]>(() => ["B2", "B3", "M1", "M2"], []);
 
-  useEffect(() => {
-    fetchProgressData();
-    calculateLevelStats();
+  const fetchProgressData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams({
+        level: selectedLevel === "ALL" ? "" : selectedLevel,
+        timeFilter,
+      });
+
+      const response = await fetch(`/api/admin/student-progress?${params}`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch progress data: ${response.statusText}`
+        );
+      }
+
+      const data: ApiStudentProgress[] = await response.json();
+
+      // Transform the data to ensure Date objects are properly created
+      const transformedData: StudentProgress[] = data.map(
+        (item: ApiStudentProgress) => ({
+          ...item,
+          student: {
+            ...item.student,
+            enrolledAt: new Date(item.student.enrolledAt),
+          },
+          courseProgress: item.courseProgress.map(
+            (course: ApiCourseProgress) => ({
+              ...course,
+              lastAccessed: new Date(course.lastAccessed),
+              grades: course.grades.map((grade: ApiModuleGrade) => ({
+                ...grade,
+                completedAt: new Date(grade.completedAt),
+              })),
+            })
+          ),
+        })
+      );
+
+      setProgressData(transformedData);
+    } catch (err) {
+      console.error("Error fetching progress data:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
   }, [selectedLevel, timeFilter]);
 
-  const fetchProgressData = async () => {
-    // Mock data - replace with actual API
-    const mockProgressData: StudentProgress[] = [
-      {
-        studentId: "1",
-        student: {
-          id: "1",
-          name: "John Doe",
-          email: "john@example.com",
-          currentLevel: "B2",
-          enrolledAt: new Date("2024-01-15"),
-        },
-        courseProgress: [
-          {
-            courseId: "1",
-            courseName: "JavaScript Fundamentals",
-            completedModules: 2,
-            totalAccessibleModules: 3,
-            completionPercentage: 67,
-            lastAccessed: new Date("2024-08-01"),
-            grades: [
-              {
-                moduleId: "1",
-                moduleName: "Variables",
-                grade: 85,
-                maxGrade: 100,
-                completedAt: new Date("2024-07-20"),
-              },
-              {
-                moduleId: "2",
-                moduleName: "Functions",
-                grade: 92,
-                maxGrade: 100,
-                completedAt: new Date("2024-08-01"),
-              },
-            ],
-          },
-        ],
-        overallCompletion: 67,
-        currentStreak: 5,
-        totalTimeSpent: 24.5,
-      },
-      {
-        studentId: "2",
-        student: {
-          id: "2",
-          name: "Jane Smith",
-          email: "jane@example.com",
-          currentLevel: "B3",
-          enrolledAt: new Date("2024-02-01"),
-        },
-        courseProgress: [
-          {
-            courseId: "1",
-            courseName: "JavaScript Fundamentals",
-            completedModules: 4,
-            totalAccessibleModules: 5,
-            completionPercentage: 80,
-            lastAccessed: new Date("2024-08-02"),
-            grades: [
-              {
-                moduleId: "1",
-                moduleName: "Variables",
-                grade: 95,
-                maxGrade: 100,
-                completedAt: new Date("2024-07-15"),
-              },
-              {
-                moduleId: "2",
-                moduleName: "Functions",
-                grade: 88,
-                maxGrade: 100,
-                completedAt: new Date("2024-07-22"),
-              },
-              {
-                moduleId: "3",
-                moduleName: "Objects",
-                grade: 91,
-                maxGrade: 100,
-                completedAt: new Date("2024-08-01"),
-              },
-            ],
-          },
-        ],
-        overallCompletion: 80,
-        currentStreak: 12,
-        totalTimeSpent: 42.3,
-      },
-    ];
-    setProgressData(mockProgressData);
-  };
-
-  const calculateLevelStats = () => {
+  const calculateLevelStats = useCallback(() => {
     const stats: LevelStats[] = levels.map((level) => {
       const levelStudents = progressData.filter(
         (p) => p.student.currentLevel === level
@@ -171,14 +161,22 @@ export default function StudentProgressMonitoring() {
       };
     });
     setLevelStats(stats);
-  };
+  }, [progressData, levels]);
 
-  const getFilteredProgress = () => {
+  useEffect(() => {
+    fetchProgressData();
+  }, [fetchProgressData]);
+
+  useEffect(() => {
+    calculateLevelStats();
+  }, [calculateLevelStats]);
+
+  const getFilteredProgress = useCallback(() => {
     if (selectedLevel === "ALL") return progressData;
     return progressData.filter((p) => p.student.currentLevel === selectedLevel);
-  };
+  }, [progressData, selectedLevel]);
 
-  const getLevelColor = (level: StudentLevel): string => {
+  const getLevelColor = useCallback((level: StudentLevel): string => {
     const colors: Record<StudentLevel, string> = {
       B2: "bg-green-100 text-green-800",
       B3: "bg-blue-100 text-blue-800",
@@ -186,16 +184,52 @@ export default function StudentProgressMonitoring() {
       M2: "bg-orange-100 text-orange-800",
     };
     return colors[level];
-  };
+  }, []);
 
-  const getProgressColor = (percentage: number): string => {
+  const getProgressColor = useCallback((percentage: number): string => {
     if (percentage >= 80) return "bg-green-500";
     if (percentage >= 60) return "bg-yellow-500";
     return "bg-red-500";
-  };
+  }, []);
+
+  // ...existing code... (rest of the component remains the same)
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="flex">
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-red-800">
+              Error Loading Data
+            </h3>
+            <div className="mt-2 text-sm text-red-700">
+              <p>{error}</p>
+            </div>
+            <div className="mt-4">
+              <button
+                onClick={() => fetchProgressData()}
+                className="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {/* ...rest of your existing JSX... */}
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Student Progress Monitoring</h3>
         <div className="flex space-x-4">

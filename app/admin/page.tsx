@@ -4,12 +4,12 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import GradingPage from "@/components/pages/GradingPage";
 import StudentClassManagement from "@/components/admin/StudentClassManagement";
-import CourseModuleManagement from "@/components/admin/CourseModuleManagement";
+import CourseManagement from "@/components/admin/course-management/CourseManagement";
 import StudentProgressMonitoring from "@/components/admin/StudentProgressMonitoring";
 
 export default function AdminDashboard() {
   const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState("grading");
+  const [activeTab, setActiveTab] = useState("courses");
 
   if (!session?.user) {
     return (
@@ -36,16 +36,6 @@ export default function AdminDashboard() {
               </div>
               <div className="ml-6 flex space-x-8">
                 <button
-                  onClick={() => setActiveTab("grading")}
-                  className={`${
-                    activeTab === "grading"
-                      ? "border-indigo-500 text-gray-900"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
-                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors`}
-                >
-                  Grading
-                </button>
-                <button
                   onClick={() => setActiveTab("courses")}
                   className={`${
                     activeTab === "courses"
@@ -54,6 +44,16 @@ export default function AdminDashboard() {
                   } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors`}
                 >
                   Course Management
+                </button>
+                <button
+                  onClick={() => setActiveTab("grading")}
+                  className={`${
+                    activeTab === "grading"
+                      ? "border-indigo-500 text-gray-900"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors`}
+                >
+                  Grading
                 </button>
                 <button
                   onClick={() => setActiveTab("classes")}
@@ -89,8 +89,8 @@ export default function AdminDashboard() {
       {/* Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
+          {activeTab === "courses" && <CourseManagement />}
           {activeTab === "grading" && <GradingPage />}
-          {activeTab === "courses" && <CourseModuleManagement />}
           {activeTab === "classes" && <StudentClassManagement />}
           {activeTab === "students" && <StudentProgressMonitoring />}
         </div>

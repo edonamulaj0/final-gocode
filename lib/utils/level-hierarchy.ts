@@ -25,8 +25,8 @@ export function getAccessibleLevels(
 ): StudentLevel[] {
   const studentLevelIndex = LEVEL_HIERARCHY[studentLevel];
   return Object.entries(LEVEL_HIERARCHY)
-    .filter(([_, index]) => index <= studentLevelIndex)
-    .map(([level, _]) => level as StudentLevel)
+    .filter(([, index]) => index <= studentLevelIndex) // Use comma to ignore first param
+    .map(([level]) => level as StudentLevel) // Use only what we need
     .sort((a, b) => LEVEL_HIERARCHY[a] - LEVEL_HIERARCHY[b]);
 }
 
