@@ -15,16 +15,22 @@ model User {
   email     String   @unique
   name      String
   password  String
-  class     String   // B2, B3, M1, M2
+  class     String // B2, B3, M1, M2
+  role      String   @default("student") // "student", "admin"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  enrollments CourseEnrollment[]
-  submissions PracticeSubmission[]
-  progress    UserProgress[]
-  lessonCompletions LessonCompletion[]
-  moduleCompletions ModuleCompletion[]
+  enrollments                 CourseEnrollment[]
+  submissions                 PracticeSubmission[]
+  progress                    UserProgress[]
+  lessonCompletions           LessonCompletion[]
+  moduleCompletions           ModuleCompletion[]
+  practiceQuestionSubmissions PracticeQuestionSubmission[]
+  moduleExamSubmissions       ModuleExamSubmission[]
+  finalExamSubmissions        FinalExamSubmission[]
+  projectSubmissions          ProjectSubmission[]
+  grades                      Grade[]
 
   @@map("users")
 }
@@ -37,7 +43,7 @@ model Course {
   duration    String
   lessons     Int
   difficulty  String
-  order       Int      // For sequential unlocking
+  order       Int // For sequential unlocking
   isUnlocked  Boolean  @default(false) // Manual unlock control
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -47,6 +53,8 @@ model Course {
   modules     Module[]
   lessons_rel Lesson[] // Keep for backward compatibility during migration
   practices   PracticeQuest[]
+  projects    Project[]
+  finalExams  FinalExam[]
   progress    UserProgress[]
 
   @@map("courses")
@@ -63,9 +71,10 @@ model Module {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  course           Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  lessons          Lesson[]
-  practiceQuests   PracticeQuest[]
+  course            Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons           Lesson[]
+  practiceQuestions PracticeQuestion[]
+  moduleExams       ModuleExam[]
   moduleCompletions ModuleCompletion[]
 
   @@map("modules")
@@ -74,17 +83,17 @@ model Module {
 model Lesson {
   id          String   @id @default(cuid())
   title       String
-  content     String   // JSON or markdown content
+  content     String // JSON or markdown content
   order       Int
-  courseId    String?  // Make optional for backward compatibility
-  moduleId    String?  // New field for module relationship
+  courseId    String? // Make optional for backward compatibility
+  moduleId    String? // New field for module relationship
   isPublished Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
-  course      Course?           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  module      Module?           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  course      Course?            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module      Module?            @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   completions LessonCompletion[]
 
   @@map("lessons")
@@ -119,12 +128,12 @@ model LessonCompletion {
 }
 
 model CourseEnrollment {
-  id           String   @id @default(cuid())
-  userId       String
-  courseId     String
-  enrolledAt   DateTime @default(now())
-  completedAt  DateTime?
-  isCompleted  Boolean  @default(false)
+  id          String    @id @default(cuid())
+  userId      String
+  courseId    String
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+  isCompleted Boolean   @default(false)
 
   // Relations
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -135,11 +144,11 @@ model CourseEnrollment {
 }
 
 model UserProgress {
-  id         String   @id @default(cuid())
-  userId     String
-  courseId   String
-  progress   Int      @default(0) // 0-100
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  progress  Int      @default(0) // 0-100
+  updatedAt DateTime @updatedAt
 
   // Relations
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -153,17 +162,15 @@ model PracticeQuest {
   id          String   @id @default(cuid())
   title       String
   description String
-  difficulty  String   // easy, medium, hard
-  courseId    String?  // Make optional for backward compatibility
-  moduleId    String?  // New field for module relationship
-  testCases   Json     // Array of test cases
-  solution    String   // Expected solution
+  difficulty  String // easy, medium, hard
+  courseId    String? // Make optional for backward compatibility
+  testCases   Json // Array of test cases
+  solution    String // Expected solution
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
   course      Course?              @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  module      Module?              @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   submissions PracticeSubmission[]
 
   @@map("practice_quests")
@@ -183,4 +190,290 @@ model PracticeSubmission {
   quest PracticeQuest @relation(fields: [questId], references: [id], onDelete: Cascade)
 
   @@map("practice_submissions")
+}
+
+// New models for enhanced course structure
+model PracticeQuestion {
+  id        String   @id @default(cuid())
+  title     String
+  question  String
+  type      String // "multiple_choice", "true_false", "coding"
+  moduleId  String
+  order     Int
+  points    Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  module      Module                       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  options     QuestionOption[]
+  submissions PracticeQuestionSubmission[]
+
+  @@map("practice_questions")
+}
+
+model QuestionOption {
+  id         String  @id @default(cuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false)
+  order      Int
+
+  // Relations
+  question PracticeQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("question_options")
+}
+
+model PracticeQuestionSubmission {
+  id          String   @id @default(cuid())
+  userId      String
+  questionId  String
+  answer      String // For multiple choice: option ID, for coding: code, for true/false: "true"/"false"
+  isCorrect   Boolean  @default(false)
+  points      Int      @default(0)
+  submittedAt DateTime @default(now())
+
+  // Relations
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question PracticeQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@map("practice_question_submissions")
+}
+
+model ModuleExam {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  moduleId     String
+  passingScore Int      @default(70) // Percentage needed to pass
+  timeLimit    Int? // Time limit in minutes
+  isPublished  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  module      Module                 @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  questions   ExamQuestion[]
+  submissions ModuleExamSubmission[]
+
+  @@map("module_exams")
+}
+
+model ExamQuestion {
+  id        String   @id @default(cuid())
+  examId    String
+  question  String
+  type      String // "multiple_choice", "true_false", "coding", "essay"
+  points    Int      @default(1)
+  order     Int
+  createdAt DateTime @default(now())
+
+  // Relations
+  exam    ModuleExam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  options ExamQuestionOption[]
+  answers ExamAnswer[]
+
+  @@map("exam_questions")
+}
+
+model ExamQuestionOption {
+  id         String  @id @default(cuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false)
+  order      Int
+
+  // Relations
+  question ExamQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("exam_question_options")
+}
+
+model ModuleExamSubmission {
+  id          String    @id @default(cuid())
+  userId      String
+  examId      String
+  score       Int       @default(0)
+  totalPoints Int
+  passed      Boolean   @default(false)
+  submittedAt DateTime  @default(now())
+  gradedAt    DateTime?
+  gradedBy    String? // Admin user ID
+  feedback    String?
+
+  // Relations
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam    ModuleExam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers ExamAnswer[]
+
+  @@unique([userId, examId])
+  @@map("module_exam_submissions")
+}
+
+model ExamAnswer {
+  id           String  @id @default(cuid())
+  submissionId String
+  questionId   String
+  answer       String // Answer content
+  points       Int     @default(0)
+  feedback     String? // Admin feedback
+
+  // Relations
+  submission ModuleExamSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  question   ExamQuestion         @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, questionId])
+  @@map("exam_answers")
+}
+
+model Project {
+  id           String    @id @default(cuid())
+  title        String
+  description  String
+  requirements String // Project requirements/instructions
+  courseId     String
+  order        Int
+  points       Int       @default(100)
+  dueDate      DateTime?
+  isPublished  Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  course      Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  submissions ProjectSubmission[]
+
+  @@map("projects")
+}
+
+model ProjectSubmission {
+  id          String    @id @default(cuid())
+  userId      String
+  projectId   String
+  title       String
+  description String?
+  githubUrl   String? // Link to GitHub repository
+  deployUrl   String? // Link to deployed project
+  submittedAt DateTime  @default(now())
+  gradedAt    DateTime?
+  gradedBy    String? // Admin user ID
+  score       Int? // Score out of project points
+  feedback    String? // Admin feedback
+  status      String    @default("submitted") // "submitted", "graded", "revision_needed"
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@map("project_submissions")
+}
+
+model FinalExam {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  courseId     String
+  passingScore Int      @default(70) // Percentage needed to pass
+  timeLimit    Int? // Time limit in minutes
+  isPublished  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  course      Course                @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions   FinalExamQuestion[]
+  submissions FinalExamSubmission[]
+
+  @@map("final_exams")
+}
+
+model FinalExamQuestion {
+  id        String   @id @default(cuid())
+  examId    String
+  question  String
+  type      String // "multiple_choice", "true_false", "coding", "essay"
+  points    Int      @default(1)
+  order     Int
+  createdAt DateTime @default(now())
+
+  // Relations
+  exam    FinalExam                 @relation(fields: [examId], references: [id], onDelete: Cascade)
+  options FinalExamQuestionOption[]
+  answers FinalExamAnswer[]
+
+  @@map("final_exam_questions")
+}
+
+model FinalExamQuestionOption {
+  id         String  @id @default(cuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false)
+  order      Int
+
+  // Relations
+  question FinalExamQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("final_exam_question_options")
+}
+
+model FinalExamSubmission {
+  id          String    @id @default(cuid())
+  userId      String
+  examId      String
+  score       Int       @default(0)
+  totalPoints Int
+  passed      Boolean   @default(false)
+  submittedAt DateTime  @default(now())
+  gradedAt    DateTime?
+  gradedBy    String? // Admin user ID
+  feedback    String?
+
+  // Relations
+  user    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam    FinalExam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers FinalExamAnswer[]
+
+  @@unique([userId, examId])
+  @@map("final_exam_submissions")
+}
+
+model FinalExamAnswer {
+  id           String  @id @default(cuid())
+  submissionId String
+  questionId   String
+  answer       String // Answer content
+  points       Int     @default(0)
+  feedback     String? // Admin feedback
+
+  // Relations
+  submission FinalExamSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  question   FinalExamQuestion   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, questionId])
+  @@map("final_exam_answers")
+}
+
+model Grade {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String?
+  moduleId   String?
+  itemType   String // "lesson", "practice_question", "module_exam", "project", "final_exam"
+  itemId     String // ID of the specific item
+  score      Int
+  maxScore   Int
+  percentage Float
+  passed     Boolean  @default(false)
+  gradedAt   DateTime @default(now())
+  gradedBy   String? // Admin user ID
+  feedback   String?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("grades")
 }

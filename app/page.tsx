@@ -8,7 +8,7 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Navbar from "@/components/layout/Navbar";
 import HomePage from "@/components/pages/HomePage";
 import CoursesPage from "@/components/pages/CoursesPage";
-import PracticePage from "@/components/pages/PracticePage";
+import AssignmentsPage from "@/components/pages/AssignmentsPage";
 import DashboardPage from "@/components/pages/DashboardPage";
 
 export default function Home() {
@@ -24,22 +24,23 @@ export default function Home() {
   // Helper function to change page and update URL
   const changePage = (page: string) => {
     setCurrentPage(page);
-    if (page === "home") {
+    if (page === "home" || (page === "dashboard" && session)) {
       router.push("/", { scroll: false });
     } else {
       router.push(`/?page=${page}`, { scroll: false });
     }
   };
 
-  // Handle URL parameters
+  // Handle URL parameters and default page logic
   useEffect(() => {
     const pageParam = searchParams.get("page");
     if (pageParam) {
       setCurrentPage(pageParam);
     } else {
-      setCurrentPage("home");
+      // If user is logged in, default to dashboard; otherwise home
+      setCurrentPage(session ? "dashboard" : "home");
     }
-  }, [searchParams]);
+  }, [searchParams, session]);
 
   useEffect(() => {
     fetchCourses();
@@ -90,6 +91,11 @@ export default function Home() {
   };
 
   const renderCurrentPage = () => {
+    // If user is logged in and tries to access home, redirect to dashboard
+    if (session && currentPage === "home") {
+      return <DashboardPage courses={courses} session={session} />;
+    }
+
     switch (currentPage) {
       case "home":
         return (
@@ -113,22 +119,22 @@ export default function Home() {
             setCurrentPage={setCurrentPage}
           />
         );
-      case "practice":
+      case "assignments":
         return (
-          <PracticePage
-            courses={courses}
+          <AssignmentsPage
             loading={loading}
             error={error}
             session={session}
             fetchCourses={fetchCourses}
-            enrollInCourse={enrollInCourse}
-            setCurrentPage={setCurrentPage}
           />
         );
       case "dashboard":
         return <DashboardPage courses={courses} session={session} />;
       default:
-        return (
+        // Default behavior: show dashboard for logged-in users, home for guests
+        return session ? (
+          <DashboardPage courses={courses} session={session} />
+        ) : (
           <HomePage
             courses={courses}
             loading={loading}

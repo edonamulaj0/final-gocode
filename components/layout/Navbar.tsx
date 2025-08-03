@@ -4,7 +4,7 @@ import { Session } from "next-auth";
 import {
   Home,
   BookOpen,
-  Code,
+  FileText,
   BarChart3,
   UserPlus,
   LogOut,
@@ -66,13 +66,15 @@ const Navbar = ({
         <div className="p-6">
           <h1 className="text-2xl font-bold text-blue-400 mb-8">GoCode</h1>
           <nav className="space-y-4">
-            <NavItem
-              icon={Home}
-              label="Home"
-              page="home"
-              currentPage={currentPage}
-              changePage={changePage}
-            />
+            {!session && (
+              <NavItem
+                icon={Home}
+                label="Home"
+                page="home"
+                currentPage={currentPage}
+                changePage={changePage}
+              />
+            )}
             <NavItem
               icon={BookOpen}
               label="Courses"
@@ -81,9 +83,9 @@ const Navbar = ({
               changePage={changePage}
             />
             <NavItem
-              icon={Code}
-              label="Practice"
-              page="practice"
+              icon={FileText}
+              label="Assignments"
+              page="assignments"
               currentPage={currentPage}
               changePage={changePage}
             />
@@ -143,7 +145,7 @@ const Navbar = ({
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-3">
             <h1 className="text-xl font-bold text-blue-400">GoCode</h1>
-            {currentPage !== "home" && (
+            {currentPage !== "home" && currentPage !== "dashboard" && (
               <>
                 <span className="text-slate-400">•</span>
                 <span className="text-lg font-medium text-white capitalize">
@@ -166,19 +168,21 @@ const Navbar = ({
         <div className="lg:hidden fixed inset-0 bg-slate-900 text-white z-10 pt-16">
           <div className="p-6">
             <nav className="space-y-4">
-              <button
-                onClick={() => handleMobileNavClick("home")}
-                className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                  currentPage === "home"
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "hover:bg-slate-800 text-slate-300 hover:text-white"
-                }`}
-                aria-current={currentPage === "home" ? "page" : undefined}
-                role="menuitem"
-              >
-                <Home size={20} />
-                <span className="font-medium">Home</span>
-              </button>
+              {!session && (
+                <button
+                  onClick={() => handleMobileNavClick("home")}
+                  className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+                    currentPage === "home"
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "hover:bg-slate-800 text-slate-300 hover:text-white"
+                  }`}
+                  aria-current={currentPage === "home" ? "page" : undefined}
+                  role="menuitem"
+                >
+                  <Home size={20} />
+                  <span className="font-medium">Home</span>
+                </button>
+              )}
               <button
                 onClick={() => handleMobileNavClick("courses")}
                 className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
@@ -193,17 +197,19 @@ const Navbar = ({
                 <span className="font-medium">Courses</span>
               </button>
               <button
-                onClick={() => handleMobileNavClick("practice")}
+                onClick={() => handleMobileNavClick("assignments")}
                 className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                  currentPage === "practice"
+                  currentPage === "assignments"
                     ? "bg-blue-600 text-white shadow-md"
                     : "hover:bg-slate-800 text-slate-300 hover:text-white"
                 }`}
-                aria-current={currentPage === "practice" ? "page" : undefined}
+                aria-current={
+                  currentPage === "assignments" ? "page" : undefined
+                }
                 role="menuitem"
               >
-                <Code size={20} />
-                <span className="font-medium">Practice</span>
+                <FileText size={20} />
+                <span className="font-medium">Assignments</span>
               </button>
               {session && (
                 <button
