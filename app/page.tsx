@@ -69,7 +69,7 @@ export default function Home() {
 
   const enrollInCourse = async (courseId: string) => {
     try {
-      const response = await fetch("/api/admin/courses", {
+      const response = await fetch("/api/courses", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
