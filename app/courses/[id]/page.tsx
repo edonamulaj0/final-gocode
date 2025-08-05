@@ -87,36 +87,65 @@ export default function CourseDetail({
   }, [params]);
 
   useEffect(() => {
-    if (!resolvedParams) return;
+    if (!resolvedParams || !session) return; // Wait for both params and session
 
+    // And make sure your fetchCourse function uses the correct endpoint:
     const fetchCourse = async () => {
+      setLoading(true);
       try {
-        const response = await fetch(`/api/courses/${resolvedParams.id}`);
+        console.log("Fetching course with ID:", resolvedParams.id);
+        console.log("Session user:", session?.user?.id);
+
+        // CORRECT: Use /api/courses/[id] for getting course details (GET)
+        const response = await fetch(`/api/courses/${resolvedParams.id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        console.log("Response status:", response.status);
+
         if (response.ok) {
           const courseData = await response.json();
+          console.log("Course data received:", courseData);
           setCourse(courseData);
+        } else {
+          const errorData = await response.json();
+          console.error("API Error:", errorData);
+          alert(`Error: ${errorData.error || "Course not found"}`);
         }
       } catch (error) {
         console.error("Error fetching course:", error);
+        alert("Network error - please check if the server is running");
       } finally {
         setLoading(false);
       }
     };
-
     fetchCourse();
-  }, [resolvedParams, session]);
+  }, [resolvedParams, session]); // Added session dependency
 
   const refetchCourse = useCallback(async () => {
     if (!resolvedParams) return;
 
     try {
-      const response = await fetch(`/api/courses/${resolvedParams.id}`);
+      console.log("Refetching course data...");
+      const response = await fetch(`/api/courses/${resolvedParams.id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
       if (response.ok) {
         const courseData = await response.json();
+        console.log("Refetched course data:", courseData);
         setCourse(courseData);
+      } else {
+        console.error("Error refetching course:", await response.json());
       }
     } catch (error) {
-      console.error("Error fetching course:", error);
+      console.error("Error refetching course:", error);
     }
   }, [resolvedParams]);
 
@@ -153,23 +182,26 @@ export default function CourseDetail({
     };
   }, [resolvedParams, refetchCourse]);
 
-  // Set initial sidebar state based on screen size
   useEffect(() => {
     const checkScreenSize = () => {
-      // Check if screen is lg (1024px) or larger - keep sidebar open on desktop
       const isDesktop = window.innerWidth >= 1024;
       setSidebarOpen(isDesktop);
     };
 
-    // Set initial state
     checkScreenSize();
-
-    // Listen for window resize events
     window.addEventListener("resize", checkScreenSize);
 
-    // Cleanup event listener
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
+
+  useEffect(() => {
+    if (resolvedParams && session) {
+      console.log("Session changed, refreshing course data...");
+      setTimeout(() => {
+        refetchCourse();
+      }, 500);
+    }
+  }, [session?.user?.id, resolvedParams, refetchCourse]);
 
   const handleEnroll = async () => {
     if (!session || !resolvedParams) {
@@ -179,27 +211,59 @@ export default function CourseDetail({
 
     setEnrolling(true);
     try {
-      const response = await fetch("/api/courses", {
+      console.log("=== ENROLLMENT DEBUG ===");
+      console.log("Course ID:", resolvedParams.id);
+      console.log("User ID:", session.user.id);
+
+      // CORRECT: Use /api/courses for enrollment (POST)
+      // Fix the enrollment call in app/courses/[id]/page.tsx
+      const response = await fetch(`/api/courses/${resolvedParams.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ courseId: resolvedParams.id }),
+        body: JSON.stringify({
+          courseId: resolvedParams.id, // Send courseId in body
+        }),
       });
 
+      console.log("Enrollment response status:", response.status);
+      const data = await response.json();
+      console.log("Enrollment response data:", data);
+
       if (response.ok) {
-        await refetchCourse(); // Refresh course data
-        // Show success message
-        alert("Successfully enrolled in the course!");
+        setCourse((prev) => (prev ? { ...prev, isEnrolled: true } : null));
+
+        if (response.status === 201) {
+          alert("Successfully enrolled in the course!");
+        } else if (response.status === 200) {
+          alert("You are already enrolled in this course!");
+        }
+
+        // Refresh course data
+        await refetchCourse();
       } else {
-        const errorData = await response.json();
-        alert(
-          `Failed to enroll in course: ${errorData.error || "Unknown error"}`
-        );
+        console.error("Enrollment failed:", data);
+
+        if (
+          response.status === 400 &&
+          data.error?.includes("Already enrolled")
+        ) {
+          setCourse((prev) => (prev ? { ...prev, isEnrolled: true } : null));
+          alert("You are already enrolled in this course!");
+          await refetchCourse();
+        } else if (response.status === 404) {
+          alert("Course not found. Please try refreshing the page.");
+        } else if (response.status === 401) {
+          alert("Please log in to enroll in courses.");
+          router.push("/auth/signin");
+        } else {
+          alert(`Failed to enroll: ${data.error || "Unknown error"}`);
+        }
       }
     } catch (error) {
       console.error("Error enrolling:", error);
-      alert("Error enrolling in course. Please try again.");
+      alert("Network error during enrollment. Please try again.");
     } finally {
       setEnrolling(false);
     }
@@ -208,7 +272,6 @@ export default function CourseDetail({
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex">
-        {/* Course Sidebar - Skeleton */}
         <div className="fixed left-0 top-0 h-full w-64 bg-slate-900 text-white shadow-lg z-40 lg:block">
           <div className="p-6">
             <div className="flex items-center justify-between">
@@ -240,7 +303,6 @@ export default function CourseDetail({
   }
 
   const getAllLessons = (course: Course) => {
-    // Get all lessons from both direct course lessons and modules
     const directLessons = course.lessons || [];
     const moduleLessons =
       course.modules?.flatMap((module) => module.lessons) || [];

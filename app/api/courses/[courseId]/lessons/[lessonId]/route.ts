@@ -3,17 +3,19 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+// app/api/courses/[courseId]/lessons/[lessonId]/route.ts
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; lessonId: string }> }
+  { params }: { params: Promise<{ courseId: string; lessonId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { id: courseId, lessonId } = await params;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { courseId, lessonId } = await params;
 
     // Check if user is enrolled in the course
     const enrollment = await prisma.courseEnrollment.findUnique({
@@ -40,7 +42,11 @@ export async function GET(
           where: { userId: session.user.id },
         },
         course: true,
-        module: true,
+        module: {
+          include: {
+            course: true,
+          },
+        },
       },
     });
 
@@ -59,7 +65,7 @@ export async function GET(
       );
     }
 
-    // Get all lessons in the course to check access
+    // Get all lessons in the course to check access and order
     const allLessons = await prisma.lesson.findMany({
       where: {
         OR: [{ courseId: courseId }, { module: { courseId: courseId } }],
@@ -74,6 +80,14 @@ export async function GET(
 
     // Check if lesson is accessible (first lesson or previous lesson completed)
     const currentLessonIndex = allLessons.findIndex((l) => l.id === lessonId);
+
+    if (currentLessonIndex === -1) {
+      return NextResponse.json(
+        { error: "Lesson not found in this course" },
+        { status: 404 }
+      );
+    }
+
     const isAccessible =
       currentLessonIndex === 0 ||
       (currentLessonIndex > 0 &&
@@ -88,22 +102,55 @@ export async function GET(
       );
     }
 
-    // Return lesson data
-    const lessonData = {
-      lesson: {
-        ...lesson,
-        isCompleted: lesson.completions.length > 0,
-        completions: undefined, // Remove this from response but keep course and module
-      },
-      nextLesson:
-        currentLessonIndex < allLessons.length - 1
-          ? allLessons[currentLessonIndex + 1]
-          : null,
-      previousLesson:
-        currentLessonIndex > 0 ? allLessons[currentLessonIndex - 1] : null,
-    };
+    // Find next and previous lessons
+    const nextLesson = allLessons[currentLessonIndex + 1];
+    const previousLesson = allLessons[currentLessonIndex - 1];
 
-    return NextResponse.json(lessonData);
+    // Get course info
+    const courseInfo = lesson.course || lesson.module?.course;
+    if (!courseInfo) {
+      return NextResponse.json(
+        { error: "Course data not found for this lesson" },
+        { status: 500 }
+      );
+    }
+
+    // Return structured lesson data
+    return NextResponse.json({
+      lesson: {
+        id: lesson.id,
+        title: lesson.title,
+        content: lesson.content,
+        order: lesson.order,
+        courseId: lesson.courseId || lesson.module?.courseId,
+        isCompleted: lesson.completions.length > 0,
+      },
+      course: {
+        id: courseInfo.id,
+        name: courseInfo.name,
+        icon: courseInfo.icon,
+        lessons: allLessons.map((l) => ({
+          id: l.id,
+          title: l.title,
+          order: l.order,
+          courseId: l.courseId || courseId,
+          isCompleted: l.completions.length > 0,
+        })),
+      },
+      nextLesson: nextLesson
+        ? {
+            id: nextLesson.id,
+            title: nextLesson.title,
+          }
+        : null,
+      previousLesson: previousLesson
+        ? {
+            id: previousLesson.id,
+            title: previousLesson.title,
+          }
+        : null,
+      canAccess: true,
+    });
   } catch (error) {
     console.error("Error fetching lesson:", error);
     return NextResponse.json(
@@ -115,11 +162,11 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; lessonId: string }> }
+  { params }: { params: Promise<{ courseId: string; lessonId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { id: courseId, lessonId } = await params;
+    const { courseId, lessonId } = await params;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

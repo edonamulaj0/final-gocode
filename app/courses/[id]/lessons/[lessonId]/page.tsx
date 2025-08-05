@@ -99,20 +99,20 @@ export default function LessonPage({
         const lessonResponse = await fetch(
           `/api/courses/${resolvedParams.id}/lessons/${resolvedParams.lessonId}`
         );
+
         if (lessonResponse.ok) {
           const lessonData = await lessonResponse.json();
           setLessonData(lessonData);
+          // Use the lessons from the lesson response
+          if (lessonData.course?.lessons) {
+            setAllLessons(lessonData.course.lessons);
+          }
         } else if (lessonResponse.status === 403) {
           // Lesson is locked
           router.push(`/courses/${resolvedParams.id}`);
           return;
-        }
-
-        // Fetch course data for sidebar
-        const courseResponse = await fetch(`/api/courses/${resolvedParams.id}`);
-        if (courseResponse.ok) {
-          const courseData = await courseResponse.json();
-          setAllLessons(courseData.lessons || []);
+        } else {
+          console.error("Error fetching lesson:", await lessonResponse.text());
         }
       } catch (error) {
         console.error("Error fetching lesson:", error);
@@ -253,6 +253,24 @@ export default function LessonPage({
 
   const { lesson, course, nextLesson, previousLesson } = lessonData;
 
+if (!course || !course.id || !course.name || !course.icon) {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          Course data incomplete
+        </h2>
+        <Link
+          href={`/courses/${resolvedParams?.id || ""}`}
+          className="text-blue-600 hover:text-blue-800"
+        >
+          ← Back to course
+        </Link>
+      </div>
+    </div>
+  );
+}
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -288,10 +306,10 @@ export default function LessonPage({
           </div>
           {sidebarOpen && lessonData && (
             <div className="flex items-center space-x-2 mt-8">
-              <span className="text-xl">{lessonData.course.icon}</span>
+              <span className="text-xl">{lessonData.course?.icon}</span>
               <div>
                 <h2 className="font-semibold text-white truncate text-sm">
-                  {lessonData.course.name}
+                  {lessonData.course?.name}
                 </h2>
                 <p className="text-xs text-slate-300">Course Progress</p>
               </div>
@@ -470,7 +488,7 @@ export default function LessonPage({
               </button>
               {lessonData && (
                 <div className="flex items-center space-x-2">
-                  <span className="text-lg">{course.icon}</span>
+                  <span className="text-lg">{course?.icon}</span>
                   <h1 className="text-lg font-semibold text-gray-900 truncate">
                     {lesson.title}
                   </h1>

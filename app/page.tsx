@@ -67,28 +67,47 @@ export default function Home() {
     }
   };
 
-  const enrollInCourse = async (courseId: string) => {
-    try {
-      const response = await fetch("/api/courses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ courseId }),
-      });
-      if (response.ok) {
-        await fetchCourses();
-        return { success: true };
-      } else {
-        const errorData = await response.json();
-        console.error("Failed to enroll:", errorData.error);
-        return { success: false, error: errorData.error || "Unknown error" };
+const enrollInCourse = async (courseId: string) => {
+  try {
+    const response = await fetch(`/api/courses/${courseId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ courseId }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Handle specific "already enrolled" case
+      if (
+        response.status === 400 &&
+        data.error === "Already enrolled in this course"
+      ) {
+        // Redirect to course overview page (use plural 'courses')
+        router.push(`/courses/${courseId}`);
+        return {
+          success: true,
+          message: "Redirecting to course...",
+          alreadyEnrolled: true,
+        };
       }
-    } catch (error) {
-      console.error("Error enrolling in course:", error);
-      return { success: false, error: "Network error. Please try again." };
+
+      throw new Error(data.error || `HTTP error! status: ${response.status}`);
     }
-  };
+
+    // Handle successful enrollment
+    console.log("Enrollment successful:", data);
+    // Also redirect to course page after successful enrollment (use plural 'courses')
+    router.push(`/courses/${courseId}`);
+    return { success: true, data, message: "Successfully enrolled in course" };
+  } catch (error) {
+    console.error("Failed to enroll:", error);
+    throw error;
+  }
+};
+  
 
   const renderCurrentPage = () => {
     // If user is logged in and tries to access home, redirect to dashboard

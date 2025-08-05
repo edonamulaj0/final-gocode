@@ -50,7 +50,7 @@ model Course {
   // Relations - KEEP ALL OF THEM
   enrollments CourseEnrollment[]
   modules     Module[]
-  lessons     Lesson[] // Keep this! Important for direct course-lesson queries
+  lessons     Lesson[]
   practices   PracticeQuest[]
   projects    Project[]
   finalExams  FinalExam[]
