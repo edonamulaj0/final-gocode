@@ -38,14 +38,9 @@ const NavItem = ({
 }: NavItemProps) => (
   <button
     onClick={() => changePage(page)}
-    className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-colors ${
-      currentPage === page ? "" : ""
+    className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-colors sidebar-link ${
+      currentPage === page ? "sidebar-link-active" : ""
     }`}
-    style={{
-      backgroundColor: currentPage === page ? "#082c3a" : "transparent",
-      color: "#f8f5e9",
-      border: currentPage === page ? "2px solid #f8f5e9" : "none",
-    }}
   >
     <Icon size={20} />
     <span>{label}</span>
@@ -67,15 +62,19 @@ const Navbar = ({
   return (
     <>
       {/* Desktop Sidebar */}
-      <div
-        className="hidden lg:block fixed left-0 top-0 h-full w-64 shadow-xl z-10"
-        style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
-      >
+      <div className="hidden lg:block fixed left-0 top-0 h-full w-64 shadow-xl z-10 sidebar-bg">
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-8" style={{ color: "#f8f5e9" }}>
-            MasterMore
-          </h1>
+          <h1 className="text-2xl font-bold mb-8 sidebar-header">MasterMore</h1>
           <nav className="space-y-4">
+            {session && (
+              <NavItem
+                icon={BarChart3}
+                label="Dashboard"
+                page="dashboard"
+                currentPage={currentPage}
+                changePage={changePage}
+              />
+            )}
             {!session && (
               <NavItem
                 icon={Home}
@@ -99,15 +98,6 @@ const Navbar = ({
               currentPage={currentPage}
               changePage={changePage}
             />
-            {session && (
-              <NavItem
-                icon={BarChart3}
-                label="Dashboard"
-                page="dashboard"
-                currentPage={currentPage}
-                changePage={changePage}
-              />
-            )}
             {!session ? (
               <button
                 onClick={() => signIn()}
