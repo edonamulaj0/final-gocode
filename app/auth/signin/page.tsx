@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { signIn } from "next-auth/react"; // NextAuth signIn import - requires next-auth installed
+import { useSearchParams } from "next/navigation"; // Next.js useSearchParams import - requires next installed
+import Link from "next/link"; // Next.js Link component import - requires next installed
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -12,10 +12,7 @@ export default function SignIn() {
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Initialize search params.
   const searchParams = useSearchParams();
-
-  // Check for success message from signup
   useEffect(() => {
     const success = searchParams.get("success");
     const message = searchParams.get("message");
@@ -26,15 +23,13 @@ export default function SignIn() {
     }
   }, [searchParams]);
 
-  // Function to handle form submission.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setSuccessMessage(""); // Clear success message when attempting to sign in
+    setSuccessMessage("");
 
     try {
-      // Call the NextAuth signIn function with credentials.
       const result = await signIn("credentials", {
         email,
         password,
@@ -42,61 +37,71 @@ export default function SignIn() {
       });
 
       if (result?.error) {
-        // If there's an error, set the error message.
         setError("Invalid credentials");
       } else {
-        // If sign-in is successful, redirect to the dashboard
-        window.location.href = "/?page=dashboard"; // Redirect to dashboard
+        window.location.href = "/?page=dashboard";
       }
-    } catch {
-      // Handle unexpected errors during the sign-in process.
+    } catch (err) {
+      console.error("Sign-in process error:", err);
       setError("Something went wrong");
     } finally {
-      // Reset loading state.
       setLoading(false);
     }
   };
 
   return (
-    // Main container using the light-themed styles from the previous design.
     <div
       className="flex items-center justify-center min-h-screen p-4"
-      style={{ background: "var(--background)", color: "#082c3a" }}
+      style={{
+        background:
+          "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)",
+      }}
     >
-      {/* Sign-in card container */}
       <div
-        className="w-full max-w-sm p-8 space-y-6 rounded-xl shadow-lg border border-gray-200"
-        style={{ background: "var(--foreground)" }}
+        className="w-full max-w-sm p-8 space-y-6 rounded-xl"
+        style={{
+          background: "rgba(10, 61, 82, 0.7)",
+          backdropFilter: "blur(20px)", // Increased blur for more glassmorphism
+          WebkitBackdropFilter: "blur(20px)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          boxShadow: "0 8px 60px rgba(0, 0, 0, 0.4)",
+          color: "var(--secondary)",
+        }}
       >
-        {/* Heading section */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold" style={{ color: "#082c3a" }}>
+          <h1
+            className="text-2xl font-bold mastermore-title"
+            style={{ color: "var(--secondary)" }}
+          >
             Sign in to your account
           </h1>
-          <p className="mt-2 text-sm" style={{ color: "#2563eb" }}>
+          <p
+            className="mt-2 text-sm mastermore-subtitle"
+            style={{ color: "rgba(248, 245, 233, 0.8)" }}
+          >
             Welcome back! Please enter your details.
           </p>
         </div>
 
-        {/* Form element with the handleSubmit function */}
         <form className="space-y-4" onSubmit={handleSubmit}>
-          {/* Success message display */}
           {successMessage && (
             <div className="text-sm text-center text-green-600 bg-green-50 p-3 rounded-md">
               {successMessage}
             </div>
           )}
 
-          {/* Error message display, conditionally rendered */}
           {error && (
             <div className="text-sm text-center text-red-600 bg-red-50 p-3 rounded-md">
               {error}
             </div>
           )}
 
-          {/* Email input field */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium"
+              style={{ color: "var(--secondary)" }}
+            >
               Email Address
             </label>
             <input
@@ -105,22 +110,38 @@ export default function SignIn() {
               type="email"
               autoComplete="email"
               required
-              className="w-full px-4 py-2 mt-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+              className="w-full px-4 py-2 mt-1 text-sm"
+              style={{
+                background: "rgba(8, 44, 58, 0.5)", // Darker transparent input background
+                border: "1px solid rgba(255, 255, 255, 0.2)", // Lighter border
+                borderRadius: "0.4rem",
+                color: "var(--secondary)",
+                transition: "all 0.2s ease",
+              }}
               placeholder="you@example.com"
-              value={email} // Bind to state
-              onChange={(e) => setEmail(e.target.value)} // Update state on change
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
-          {/* Password input field */}
+          {/* Password input field group. */}
           <div>
             <div className="flex items-center justify-between">
-              <label htmlFor="password" className="block text-sm font-medium">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium"
+                style={{ color: "var(--secondary)" }}
+              >
                 Password
               </label>
               <a
                 href="#"
-                className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                className="text-sm font-medium"
+                style={{
+                  color: "var(--secondary)",
+                  opacity: 0.8,
+                  textDecoration: "underline",
+                }}
               >
                 Forgot password?
               </a>
@@ -131,32 +152,52 @@ export default function SignIn() {
               type="password"
               autoComplete="current-password"
               required
-              className="w-full px-4 py-2 mt-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+              className="w-full px-4 py-2 mt-1 text-sm"
+              style={{
+                background: "rgba(8, 44, 58, 0.5)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                borderRadius: "0.4rem",
+                color: "var(--secondary)",
+                transition: "all 0.2s ease",
+              }}
               placeholder="••••••••"
-              value={password} // Bind to state
-              onChange={(e) => setPassword(e.target.value)} // Update state on change
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          {/* Sign-in button with loading state */}
+          {/* Sign-in button. */}
           <div>
             <button
               type="submit"
-              disabled={loading} // Disable button when loading
-              className="w-full px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 disabled:bg-blue-400 disabled:cursor-not-allowed"
+              disabled={loading}
+              className="glass-button-primary glass-button w-full py-4 px-6 font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed group"
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-[rgba(248,245,233,0.3)] border-t-[rgba(248,245,233,1)] rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <span>Sign in</span>
+                </>
+              )}
             </button>
           </div>
         </form>
 
-        {/* "Don't have an account?" link */}
         <div className="text-center text-sm">
-          <p className="text-gray-600">
+          <p
+            className="text-gray-600"
+            style={{ color: "rgba(248, 245, 233, 0.7)" }}
+          >
             Don&apos;t have an account?{" "}
             <Link
               href="/auth/signup"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-medium"
+              style={{
+                color: "var(--secondary)",
+                textDecoration: "underline",
+                opacity: 0.9,
+              }}
             >
               Sign up
             </Link>

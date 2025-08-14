@@ -18,7 +18,7 @@ const LoadingSpinner = ({
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <MoreHorizontal
-        className={`${sizeClasses[size]} animate-pulse text-blue-600`}
+        className={`${sizeClasses[size]} animate-pulse text-primary`}
       />
     </div>
   );
