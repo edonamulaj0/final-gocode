@@ -103,54 +103,91 @@ export default function GradingPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Grading Dashboard</h1>
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="px-4 py-2 border rounded-lg"
-        >
-          <option value="all">All Submissions</option>
-          <option value="projects">Projects</option>
-          <option value="exams">Exams</option>
-        </select>
+    <div style={{ backgroundColor: "#f8f5e9", minHeight: "100vh" }}>
+      {/* Grading Header */}
+      <div className="shadow-sm" style={{ backgroundColor: "#f8f5e9" }}>
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <h1
+            className="text-2xl lg:text-3xl font-bold"
+            style={{ color: "#082c3a" }}
+          >
+            Grading Center - MasterMore
+          </h1>
+          <div className="flex justify-between items-center mb-6">
+            <div></div>
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="px-4 py-2 border rounded-lg"
+              style={{
+                backgroundColor: "#f8f5e9",
+                color: "#082c3a",
+                borderColor: "#082c3a",
+              }}
+            >
+              <option value="all">All Submissions</option>
+              <option value="projects">Projects</option>
+              <option value="exams">Exams</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <div
+            className="animate-spin rounded-full h-12 w-12 border-b-2"
+            style={{ borderColor: "#082c3a" }}
+          ></div>
         </div>
       ) : (
         <div className="grid gap-6">
           {submissions.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div
+              className="text-center py-12"
+              style={{ color: "#082c3a", opacity: 0.7 }}
+            >
               No submissions need grading at this time.
             </div>
           ) : (
             submissions.map((submission) => (
               <div
                 key={submission.id}
-                className="bg-white rounded-lg shadow-md p-6"
+                className="rounded-lg shadow-md p-6"
+                style={{
+                  backgroundColor: "#f8f5e9",
+                  border: "1px solid #082c3a",
+                }}
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold">
+                    <h3
+                      className="text-xl font-semibold"
+                      style={{ color: "#082c3a" }}
+                    >
                       {submission.itemTitle}
                     </h3>
-                    <p className="text-gray-600">
-                      {submission.type === "project" ? "Project" : "Exam"} •{" "}
-                      {submission.maxPoints} points
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Submitted by {submission.user.name} (
-                      {submission.user.class}) on{" "}
-                      {new Date(submission.submittedAt).toLocaleDateString()}
+                    <p style={{ color: "#082c3a", opacity: 0.8 }}>{`${
+                      submission.type === "project" ? "Project" : "Exam"
+                    } • ${submission.maxPoints} points`}</p>
+                    <p
+                      className="text-sm"
+                      style={{ color: "#082c3a", opacity: 0.6 }}
+                    >
+                      {`Submitted by ${submission.user.name} (${
+                        submission.user.class
+                      }) on ${new Date(
+                        submission.submittedAt
+                      ).toLocaleDateString()}`}
                     </p>
                   </div>
                   <button
                     onClick={() => setSelectedSubmission(submission)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    className="px-4 py-2 rounded"
+                    style={{
+                      backgroundColor: "#082c3a",
+                      color: "#f8f5e9",
+                    }}
                   >
                     Grade
                   </button>
@@ -173,7 +210,10 @@ export default function GradingPage() {
                           href={submission.githubUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-500 hover:underline"
+                          style={{
+                            color: "#082c3a",
+                            textDecoration: "underline",
+                          }}
                         >
                           {submission.githubUrl}
                         </a>
@@ -186,7 +226,10 @@ export default function GradingPage() {
                           href={submission.deployUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-500 hover:underline"
+                          style={{
+                            color: "#082c3a",
+                            textDecoration: "underline",
+                          }}
                         >
                           {submission.deployUrl}
                         </a>
@@ -203,13 +246,17 @@ export default function GradingPage() {
       {/* Grading Modal */}
       {selectedSubmission && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto">
+          <div
+            className="rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto"
+            style={{ backgroundColor: "#f8f5e9", color: "#082c3a" }}
+          >
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Grade Submission</h2>
                 <button
                   onClick={() => setSelectedSubmission(null)}
-                  className="text-gray-500 hover:text-gray-700"
+                  style={{ color: "#082c3a" }}
+                  className="hover:opacity-70"
                 >
                   ✕
                 </button>
@@ -274,17 +321,24 @@ function GradingForm({ submission, onSubmit, loading }: GradingFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">{submission.itemTitle}</h3>
-        <p className="text-gray-600">
-          Student: {submission.user.name} ({submission.user.class})
+        <h3 className="text-lg font-semibold mb-2" style={{ color: "#082c3a" }}>
+          {submission.itemTitle}
+        </h3>
+        <p style={{ color: "#082c3a", opacity: 0.8 }}>
+          {`Student: ${submission.user.name} (${submission.user.class})`}
         </p>
-        <p className="text-gray-600">Max Points: {submission.maxPoints}</p>
+        <p style={{ color: "#082c3a", opacity: 0.8 }}>
+          {`Max Points: ${submission.maxPoints}`}
+        </p>
       </div>
 
       {submission.type === "project" ? (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: "#082c3a" }}
+            >
               Score (out of {submission.maxPoints})
             </label>
             <input
@@ -294,25 +348,46 @@ function GradingForm({ submission, onSubmit, loading }: GradingFormProps) {
               value={score}
               onChange={(e) => setScore(Number(e.target.value))}
               className="w-full px-3 py-2 border rounded-lg"
+              style={{
+                borderColor: "#082c3a",
+                color: "#082c3a",
+                backgroundColor: "#f8f5e9",
+              }}
               required
             />
           </div>
         </div>
       ) : (
         <div className="space-y-4">
-          <h4 className="font-semibold">Grade Individual Questions:</h4>
+          <h4
+            className="font-semibold"
+            style={{ color: "#082c3a" }}
+          >{`Grade Individual Questions:`}</h4>
           {submission.answers?.map((answer, index) => (
-            <div key={answer.id} className="border rounded-lg p-4">
-              <h5 className="font-medium mb-2">
-                Question {index + 1} ({answer.question.points} points)
-              </h5>
-              <p className="mb-2">{answer.question.question}</p>
-              <p className="mb-2 text-gray-700">
+            <div
+              key={answer.id}
+              className="border rounded-lg p-4"
+              style={{
+                borderColor: "#082c3a",
+                backgroundColor: "#f8f5e9",
+              }}
+            >
+              <h5
+                className="font-medium mb-2"
+                style={{ color: "#082c3a" }}
+              >{`Question ${index + 1} (${answer.question.points} points)`}</h5>
+              <p className="mb-2" style={{ color: "#082c3a" }}>
+                {answer.question.question}
+              </p>
+              <p className="mb-2" style={{ color: "#082c3a" }}>
                 <strong>Answer:</strong> {answer.answer}
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: "#082c3a" }}
+                  >
                     Points
                   </label>
                   <input
@@ -329,10 +404,18 @@ function GradingForm({ submission, onSubmit, loading }: GradingFormProps) {
                       setAnswerGrades(newGrades);
                     }}
                     className="w-full px-3 py-2 border rounded"
+                    style={{
+                      borderColor: "#082c3a",
+                      color: "#082c3a",
+                      backgroundColor: "#f8f5e9",
+                    }}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: "#082c3a" }}
+                  >
                     Feedback
                   </label>
                   <input
@@ -347,6 +430,11 @@ function GradingForm({ submission, onSubmit, loading }: GradingFormProps) {
                       setAnswerGrades(newGrades);
                     }}
                     className="w-full px-3 py-2 border rounded"
+                    style={{
+                      borderColor: "#082c3a",
+                      color: "#082c3a",
+                      backgroundColor: "#f8f5e9",
+                    }}
                     placeholder="Optional feedback for this question"
                   />
                 </div>
@@ -357,13 +445,21 @@ function GradingForm({ submission, onSubmit, loading }: GradingFormProps) {
       )}
 
       <div>
-        <label className="block text-sm font-medium mb-2">
+        <label
+          className="block text-sm font-medium mb-2"
+          style={{ color: "#082c3a" }}
+        >
           Overall Feedback
         </label>
         <textarea
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
           className="w-full px-3 py-2 border rounded-lg h-24"
+          style={{
+            borderColor: "#082c3a",
+            color: "#082c3a",
+            backgroundColor: "#f8f5e9",
+          }}
           placeholder="Provide feedback to the student..."
           required
         />
@@ -373,14 +469,25 @@ function GradingForm({ submission, onSubmit, loading }: GradingFormProps) {
         <button
           type="button"
           onClick={() => setScore(0)}
-          className="px-4 py-2 text-gray-600 border rounded hover:bg-gray-50"
+          className="px-4 py-2 border rounded"
+          style={{
+            color: "#082c3a",
+            borderColor: "#082c3a",
+            backgroundColor: "#f8f5e9",
+          }}
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+          className="px-6 py-2 rounded"
+          style={{
+            backgroundColor: "#082c3a",
+            color: "#f8f5e9",
+            opacity: loading ? 0.5 : 1,
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
         >
           {loading ? "Grading..." : "Submit Grade"}
         </button>

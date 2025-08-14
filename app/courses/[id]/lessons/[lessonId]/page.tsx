@@ -185,48 +185,69 @@ export default function LessonPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen flex" style={{ backgroundColor: "#f8f5e9" }}>
         {/* Sidebar Skeleton */}
-        <div className="fixed left-0 top-0 h-full w-64 bg-slate-900 text-white shadow-lg z-40 lg:block">
+        <div
+          className="fixed left-0 top-0 h-full w-64 shadow-lg z-40 lg:block"
+          style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
+        >
           <div className="p-6">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-blue-400 mb-0">
-                <Link href="/" className="hover:text-blue-300">
-                  GoCode
+              <h1
+                className="text-2xl font-bold mb-0"
+                style={{ color: "#f8f5e9" }}
+              >
+                <Link href="/" style={{ color: "#f8f5e9" }}>
+                  MasterMore
                 </Link>
               </h1>
             </div>
             <div className="flex items-center space-x-2 mt-8">
-              <div className="w-8 h-8 bg-slate-700 rounded animate-pulse"></div>
+              <div
+                className="w-8 h-8 rounded animate-pulse"
+                style={{ backgroundColor: "#082c3a" }}
+              ></div>
               <div>
-                <div className="w-24 h-4 bg-slate-700 rounded animate-pulse mb-1"></div>
-                <div className="w-16 h-3 bg-slate-800 rounded animate-pulse"></div>
+                <div
+                  className="w-24 h-4 rounded animate-pulse mb-1"
+                  style={{ backgroundColor: "#082c3a" }}
+                ></div>
+                <div
+                  className="w-16 h-3 rounded animate-pulse"
+                  style={{ backgroundColor: "#082c3a" }}
+                ></div>
               </div>
             </div>
           </div>
-
           <div className="px-6 pb-4">
-            <div className="w-32 h-4 bg-slate-700 rounded animate-pulse"></div>
+            <div
+              className="w-32 h-4 rounded animate-pulse"
+              style={{ backgroundColor: "#082c3a" }}
+            ></div>
           </div>
-
           <div className="px-6 pb-6">
-            <div className="w-16 h-4 bg-slate-700 rounded animate-pulse mb-4"></div>
+            <div
+              className="w-16 h-4 rounded animate-pulse mb-4"
+              style={{ backgroundColor: "#082c3a" }}
+            ></div>
             <div className="space-y-2">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="w-full h-12 bg-slate-800 rounded animate-pulse"
+                  className="w-full h-12 rounded animate-pulse"
+                  style={{ backgroundColor: "#082c3a" }}
                 ></div>
               ))}
             </div>
           </div>
         </div>
-
         {/* Main Content */}
         <div className="flex-1 lg:ml-64 flex items-center justify-center">
           <div className="text-center space-y-4">
             <LoadingSpinner size="lg" />
-            <p className="text-gray-600 text-lg">Loading lesson...</p>
+            <p className="text-lg" style={{ color: "#082c3a" }}>
+              Loading lesson...
+            </p>
           </div>
         </div>
       </div>
@@ -235,14 +256,20 @@ export default function LessonPage({
 
   if (!lessonData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "#f8f5e9" }}
+      >
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2
+            className="text-xl font-semibold mb-2"
+            style={{ color: "#082c3a" }}
+          >
             Lesson not found
           </h2>
           <Link
             href={`/courses/${resolvedParams?.id || ""}`}
-            className="text-blue-600 hover:text-blue-800"
+            style={{ color: "#082c3a" }}
           >
             ← Back to course
           </Link>
@@ -253,31 +280,38 @@ export default function LessonPage({
 
   const { lesson, course, nextLesson, previousLesson } = lessonData;
 
-if (!course || !course.id || !course.name || !course.icon) {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Course data incomplete
-        </h2>
-        <Link
-          href={`/courses/${resolvedParams?.id || ""}`}
-          className="text-blue-600 hover:text-blue-800"
-        >
-          ← Back to course
-        </Link>
+  if (!course || !course.id || !course.name || !course.icon) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "#f8f5e9" }}
+      >
+        <div className="text-center">
+          <h2
+            className="text-xl font-semibold mb-2"
+            style={{ color: "#082c3a" }}
+          >
+            Course data incomplete
+          </h2>
+          <Link
+            href={`/courses/${resolvedParams?.id || ""}`}
+            style={{ color: "#082c3a" }}
+          >
+            ← Back to course
+          </Link>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen flex" style={{ backgroundColor: "#f8f5e9" }}>
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full bg-slate-900 text-white shadow-lg transition-all duration-300 z-40 ${
+        className={`fixed left-0 top-0 h-full shadow-lg transition-all duration-300 z-40 ${
           sidebarOpen ? "w-64" : "w-16"
         } lg:block ${sidebarOpen ? "" : "hidden lg:block"}`}
+        style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
       >
         {/* Sidebar Header */}
         <div className="p-6">
@@ -287,15 +321,19 @@ if (!course || !course.id || !course.name || !course.icon) {
             }`}
           >
             {sidebarOpen && (
-              <h1 className="text-2xl font-bold text-blue-400 mb-0">
-                <Link href="/" className="hover:text-blue-300">
-                  GoCode
+              <h1
+                className="text-2xl font-bold mb-0"
+                style={{ color: "#f8f5e9" }}
+              >
+                <Link href="/" style={{ color: "#f8f5e9" }}>
+                  MasterMore
                 </Link>
               </h1>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-slate-800 text-white"
+              className="p-2 rounded-lg"
+              style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
             >
               {sidebarOpen ? (
                 <ArrowLeft className="w-5 h-5" />
@@ -308,25 +346,34 @@ if (!course || !course.id || !course.name || !course.icon) {
             <div className="flex items-center space-x-2 mt-8">
               <span className="text-xl">{lessonData.course?.icon}</span>
               <div>
-                <h2 className="font-semibold text-white truncate text-sm">
+                <h2
+                  className="font-semibold truncate text-sm"
+                  style={{ color: "#f8f5e9" }}
+                >
                   {lessonData.course?.name}
                 </h2>
-                <p className="text-xs text-slate-300">Course Progress</p>
+                <p
+                  className="text-xs"
+                  style={{ color: "#f8f5e9", opacity: 0.7 }}
+                >
+                  Course Progress
+                </p>
               </div>
             </div>
           )}
         </div>
-
         {/* Navigation Links */}
         {sidebarOpen && (
           <div className="px-6 pb-4">
             {lessonData && (
               <Link
                 href={`/courses/${lessonData.course.id}`}
-                className="flex items-center space-x-2 text-slate-300 hover:text-blue-400"
+                style={{ color: "#f8f5e9", opacity: 0.8 }}
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back to Course</span>
+                <span style={{ display: "inline-flex", alignItems: "center" }}>
+                  <ArrowLeft className="w-4 h-4" />
+                  <span style={{ marginLeft: 4 }}>Back to Course</span>
+                </span>
               </Link>
             )}
           </div>
@@ -477,19 +524,26 @@ if (!course || !course.id || !course.name || !course.icon) {
         } ml-0`}
       >
         {/* Mobile Header */}
-        <div className="lg:hidden bg-white shadow-sm p-4">
+        <div
+          className="lg:hidden shadow-sm p-4"
+          style={{ backgroundColor: "#f8f5e9" }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+                className="p-2 rounded-lg"
+                style={{ backgroundColor: "#f8f5e9", color: "#082c3a" }}
               >
                 <BookOpen className="w-6 h-6" />
               </button>
               {lessonData && (
                 <div className="flex items-center space-x-2">
                   <span className="text-lg">{course?.icon}</span>
-                  <h1 className="text-lg font-semibold text-gray-900 truncate">
+                  <h1
+                    className="text-lg font-semibold truncate"
+                    style={{ color: "#082c3a" }}
+                  >
                     {lesson.title}
                   </h1>
                 </div>
@@ -499,14 +553,18 @@ if (!course || !course.id || !course.name || !course.icon) {
         </div>
 
         {/* Header */}
-        <div className="bg-white shadow-sm border-b">
+        <div
+          className="shadow-sm border-b"
+          style={{ backgroundColor: "#f8f5e9" }}
+        >
           <div className="max-w-4xl mx-auto px-4 py-4">
             {/* Back to Course Navigation */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-4">
                 <Link
                   href={`/courses/${course.id}`}
-                  className="text-blue-600 hover:text-blue-800 font-medium"
+                  style={{ color: "#082c3a" }}
+                  className="font-medium"
                 >
                   ← Back to Course
                 </Link>
@@ -515,14 +573,24 @@ if (!course || !course.id || !course.name || !course.icon) {
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center space-x-4">
-                <h1 className="text-lg lg:text-xl font-semibold text-gray-900">
+                <h1
+                  className="text-lg lg:text-xl font-semibold"
+                  style={{ color: "#082c3a" }}
+                >
                   {lesson.title}
                 </h1>
               </div>
 
               <div className="flex items-center space-x-3">
                 {lesson.isCompleted && (
-                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                  <span
+                    className="px-3 py-1 rounded-full text-sm font-medium"
+                    style={{
+                      backgroundColor: "#f8f5e9",
+                      color: "#082c3a",
+                      border: "1px solid #082c3a",
+                    }}
+                  >
                     ✓ Completed
                   </span>
                 )}
@@ -531,12 +599,15 @@ if (!course || !course.id || !course.name || !course.icon) {
                   <button
                     onClick={markAsComplete}
                     disabled={completing}
-                    className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 disabled:bg-green-400 inline-flex items-center justify-center space-x-2"
+                    className="w-full sm:w-auto px-4 py-2 rounded-lg font-medium"
+                    style={{
+                      backgroundColor: "#082c3a",
+                      color: "#f8f5e9",
+                      opacity: completing ? 0.7 : 1,
+                      cursor: completing ? "not-allowed" : "pointer",
+                    }}
                   >
-                    {completing && <LoadingSpinner size="sm" />}
-                    <span>
-                      {completing ? "Marking Complete..." : "Mark as Complete"}
-                    </span>
+                    {completing ? "Marking Complete..." : "Mark as Complete"}
                   </button>
                 )}
               </div>
@@ -546,45 +617,68 @@ if (!course || !course.id || !course.name || !course.icon) {
 
         {/* Content */}
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="bg-white rounded-lg shadow-sm">
+          <div
+            className="rounded-lg shadow-sm"
+            style={{ backgroundColor: "#f8f5e9" }}
+          >
             <div className="p-6 lg:p-8">
               {/* Lesson Header */}
               <div className="mb-8">
                 <div className="flex items-center space-x-3 mb-4">
                   <span className="text-2xl">{course.icon}</span>
-                  <span className="text-sm text-gray-500 font-medium">
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: "#082c3a", opacity: 0.7 }}
+                  >
                     Lesson {lesson.order}
                   </span>
                 </div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
+                <h1
+                  className="text-2xl lg:text-3xl font-bold mb-4"
+                  style={{ color: "#082c3a" }}
+                >
                   {lesson.title}
                 </h1>
               </div>
-
               {/* Lesson Content */}
               <div className="prose max-w-none">
                 <div
-                  className="text-gray-700 leading-relaxed"
+                  style={{ color: "#082c3a" }}
+                  className="leading-relaxed"
                   dangerouslySetInnerHTML={{
                     __html: lesson.content.replace(/\n/g, "<br>"),
                   }}
                 />
               </div>
-
               {/* Completion Section */}
               {!lesson.isCompleted && (
-                <div className="mt-12 p-6 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                <div
+                  className="mt-12 p-6 rounded-lg border"
+                  style={{ backgroundColor: "#f8f5e9", borderColor: "#082c3a" }}
+                >
+                  <h3
+                    className="text-lg font-semibold mb-2"
+                    style={{ color: "#082c3a" }}
+                  >
                     Ready to continue?
                   </h3>
-                  <p className="text-blue-700 mb-4">
+                  <p
+                    className="mb-4"
+                    style={{ color: "#082c3a", opacity: 0.8 }}
+                  >
                     Mark this lesson as complete to unlock the next lesson and
                     track your progress.
                   </p>
                   <button
                     onClick={markAsComplete}
                     disabled={completing}
-                    className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-400"
+                    className="w-full sm:w-auto px-6 py-3 rounded-lg font-medium"
+                    style={{
+                      backgroundColor: "#082c3a",
+                      color: "#f8f5e9",
+                      opacity: completing ? 0.7 : 1,
+                      cursor: completing ? "not-allowed" : "pointer",
+                    }}
                   >
                     {completing
                       ? "Marking Complete..."
@@ -592,27 +686,39 @@ if (!course || !course.id || !course.name || !course.icon) {
                   </button>
                 </div>
               )}
-
               {lesson.isCompleted && (
-                <div className="mt-12 p-6 bg-green-50 rounded-lg border border-green-200">
-                  <h3 className="text-lg font-semibold text-green-900 mb-2">
+                <div
+                  className="mt-12 p-6 rounded-lg border"
+                  style={{ backgroundColor: "#f8f5e9", borderColor: "#082c3a" }}
+                >
+                  <h3
+                    className="text-lg font-semibold mb-2"
+                    style={{ color: "#082c3a" }}
+                  >
                     🎉 Lesson Complete!
                   </h3>
-                  <p className="text-green-700 mb-4">
+                  <p
+                    className="mb-4"
+                    style={{ color: "#082c3a", opacity: 0.8 }}
+                  >
                     Great job! You&apos;ve successfully completed this lesson.
                   </p>
                 </div>
               )}
             </div>
           </div>
-
           {/* Navigation */}
           <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div>
               {previousLesson ? (
                 <Link
                   href={`/courses/${course.id}/lessons/${previousLesson.id}`}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 w-full sm:w-auto text-center"
+                  className="inline-flex items-center px-4 py-2 rounded-lg text-center"
+                  style={{
+                    backgroundColor: "#f8f5e9",
+                    color: "#082c3a",
+                    border: "1px solid #082c3a",
+                  }}
                 >
                   ← Previous: {previousLesson.title}
                 </Link>
@@ -620,26 +726,39 @@ if (!course || !course.id || !course.name || !course.icon) {
                 <div></div>
               )}
             </div>
-
             <div>
               {nextLesson && lesson.isCompleted ? (
                 <Link
                   href={`/courses/${course.id}/lessons/${nextLesson.id}`}
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto text-center"
+                  className="inline-flex items-center px-4 py-2 rounded-lg text-center"
+                  style={{
+                    backgroundColor: "#082c3a",
+                    color: "#f8f5e9",
+                  }}
                 >
                   Next: {nextLesson.title} →
                 </Link>
               ) : nextLesson && !lesson.isCompleted ? (
                 <button
                   disabled
-                  className="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed w-full sm:w-auto text-center"
+                  className="inline-flex items-center px-4 py-2 rounded-lg cursor-not-allowed w-full sm:w-auto text-center"
+                  style={{
+                    backgroundColor: "#f8f5e9",
+                    color: "#082c3a",
+                    border: "1px solid #082c3a",
+                    opacity: 0.6,
+                  }}
                 >
                   Complete this lesson to continue →
                 </button>
               ) : (
                 <Link
                   href={`/courses/${course.id}`}
-                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 w-full sm:w-auto text-center"
+                  className="inline-flex items-center px-4 py-2 rounded-lg text-center"
+                  style={{
+                    backgroundColor: "#082c3a",
+                    color: "#f8f5e9",
+                  }}
                 >
                   Back to Course →
                 </Link>

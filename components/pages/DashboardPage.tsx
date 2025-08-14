@@ -42,18 +42,18 @@ const DashboardPage = ({ courses, session }: DashboardPageProps) => {
   ).length;
 
   return (
-    <div>
+    <div style={{ backgroundColor: "#f8f5e9", minHeight: "100vh" }}>
       {/* Dashboard Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="shadow-sm" style={{ backgroundColor: "#f8f5e9" }}>
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <h1 className="text-2xl lg:text-3xl font-bold" style={{ color: "#082c3a" }}>
+            Welcome to MasterMore Dashboard
+          </h1>
           <div className="flex items-center space-x-6">
             <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-4xl">
               <User size={40} className="text-white" />
             </div>
             <div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                Welcome back, {session.user?.name}!
-              </h1>
               <p className="text-gray-600 text-lg mb-6">
                 Track your learning progress and continue your programming
                 journey.

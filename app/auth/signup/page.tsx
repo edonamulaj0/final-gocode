@@ -76,12 +76,20 @@ export default function SignUp() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-white text-[#171717]">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg border border-gray-200">
+    <div
+      className="flex items-center justify-center min-h-screen p-4"
+      style={{ background: "var(--background)", color: "#082c3a" }}
+    >
+      <div
+        className="w-full max-w-md p-8 space-y-6 rounded-xl shadow-lg border border-gray-200"
+        style={{ background: "var(--foreground)" }}
+      >
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Create your account</h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Join GoCode and start your coding journey!
+          <h1 className="text-3xl font-bold" style={{ color: "#082c3a" }}>
+            Create your account
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: "#2563eb" }}>
+            Join MasterMore and start your coding journey!
           </p>
         </div>
 

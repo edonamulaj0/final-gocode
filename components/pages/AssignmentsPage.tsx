@@ -92,15 +92,15 @@ const AssignmentsPage = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "text-green-600 bg-green-100";
+        return "text-[#082c3a] bg-[#f8f5e9] border border-[#082c3a]";
       case "submitted":
-        return "text-blue-600 bg-blue-100";
+        return "text-[#082c3a] bg-[#f8f5e9] border border-[#082c3a]";
       case "pending":
-        return "text-yellow-600 bg-yellow-100";
+        return "text-[#082c3a] bg-[#f8f5e9] border border-[#082c3a]";
       case "overdue":
-        return "text-red-600 bg-red-100";
+        return "text-red-700 bg-[#f8f5e9] border border-red-700";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "text-[#082c3a] bg-[#f8f5e9] border border-[#082c3a]";
     }
   };
 
@@ -132,22 +132,31 @@ const AssignmentsPage = ({
   };
 
   return (
-    <div>
+    <div style={{ backgroundColor: "#f8f5e9", minHeight: "100vh" }}>
       {/* Assignments Header */}
-      <div className="bg-white shadow-sm">
+      <div className="shadow-sm" style={{ backgroundColor: "#f8f5e9" }}>
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center space-x-4">
             <div className="text-4xl">📋</div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+              <h1
+                className="text-2xl lg:text-3xl font-bold"
+                style={{ color: "#082c3a" }}
+              >
                 Assignments & Projects
               </h1>
-              <p className="text-gray-600 mt-2">
+              <p className="mt-2" style={{ color: "#082c3a" }}>
                 Complete your assignments and track your progress across all
                 enrolled courses.
               </p>
-              <div className="flex flex-wrap items-center gap-2 lg:gap-4 mt-3 text-sm text-gray-500">
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+              <div
+                className="flex flex-wrap items-center gap-2 lg:gap-4 mt-3 text-sm"
+                style={{ color: "#082c3a" }}
+              >
+                <span
+                  className="px-2 py-1 rounded"
+                  style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
+                >
                   {mockAssignments.length} Total Assignments
                 </span>
                 <span>
@@ -177,32 +186,64 @@ const AssignmentsPage = ({
           <div className="space-y-6">
             {/* Assignment Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-white rounded-xl shadow-md p-4 text-center">
-                <div className="text-2xl font-bold text-blue-600 mb-2">
+              <div
+                className="rounded-xl shadow-md p-4 text-center"
+                style={{ backgroundColor: "#f8f5e9" }}
+              >
+                <div
+                  className="text-2xl font-bold mb-2"
+                  style={{ color: "#082c3a" }}
+                >
                   {mockAssignments.length}
                 </div>
-                <p className="text-slate-600 text-sm">Total</p>
+                <p className="text-sm" style={{ color: "#082c3a" }}>
+                  Total
+                </p>
               </div>
-              <div className="bg-white rounded-xl shadow-md p-4 text-center">
-                <div className="text-2xl font-bold text-yellow-600 mb-2">
+              <div
+                className="rounded-xl shadow-md p-4 text-center"
+                style={{ backgroundColor: "#f8f5e9" }}
+              >
+                <div
+                  className="text-2xl font-bold mb-2"
+                  style={{ color: "#082c3a" }}
+                >
                   {mockAssignments.filter((a) => a.status === "pending").length}
                 </div>
-                <p className="text-slate-600 text-sm">Pending</p>
+                <p className="text-sm" style={{ color: "#082c3a" }}>
+                  Pending
+                </p>
               </div>
-              <div className="bg-white rounded-xl shadow-md p-4 text-center">
-                <div className="text-2xl font-bold text-green-600 mb-2">
+              <div
+                className="rounded-xl shadow-md p-4 text-center"
+                style={{ backgroundColor: "#f8f5e9" }}
+              >
+                <div
+                  className="text-2xl font-bold mb-2"
+                  style={{ color: "#082c3a" }}
+                >
                   {
                     mockAssignments.filter((a) => a.status === "submitted")
                       .length
                   }
                 </div>
-                <p className="text-slate-600 text-sm">Submitted</p>
+                <p className="text-sm" style={{ color: "#082c3a" }}>
+                  Submitted
+                </p>
               </div>
-              <div className="bg-white rounded-xl shadow-md p-4 text-center">
-                <div className="text-2xl font-bold text-red-600 mb-2">
+              <div
+                className="rounded-xl shadow-md p-4 text-center"
+                style={{ backgroundColor: "#f8f5e9" }}
+              >
+                <div
+                  className="text-2xl font-bold mb-2"
+                  style={{ color: "#082c3a" }}
+                >
                   {mockAssignments.filter((a) => a.status === "overdue").length}
                 </div>
-                <p className="text-slate-600 text-sm">Overdue</p>
+                <p className="text-sm" style={{ color: "#082c3a" }}>
+                  Overdue
+                </p>
               </div>
             </div>
 
@@ -211,7 +252,11 @@ const AssignmentsPage = ({
               {mockAssignments.map((assignment) => (
                 <div
                   key={assignment.id}
-                  className="bg-white rounded-xl shadow-md p-4 md:p-6 border-2 border-slate-200 hover:border-blue-300 transition-colors"
+                  className="rounded-xl shadow-md p-4 md:p-6 border-2 transition-colors"
+                  style={{
+                    backgroundColor: "#f8f5e9",
+                    borderColor: "#082c3a",
+                  }}
                 >
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                     <div className="flex flex-col md:flex-row md:items-start space-y-4 md:space-y-0 md:space-x-6 flex-1">
@@ -220,7 +265,10 @@ const AssignmentsPage = ({
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-center md:justify-start space-x-3 mb-3">
-                          <h2 className="text-xl md:text-2xl font-bold text-slate-800">
+                          <h2
+                            className="text-xl md:text-2xl font-bold"
+                            style={{ color: "#082c3a" }}
+                          >
                             {assignment.title}
                           </h2>
                           <span
@@ -239,16 +287,25 @@ const AssignmentsPage = ({
                           <span className="text-2xl">
                             {assignment.courseIcon}
                           </span>
-                          <span className="text-slate-600 font-medium">
+                          <span
+                            className="font-medium"
+                            style={{ color: "#082c3a" }}
+                          >
                             {assignment.course}
                           </span>
                         </div>
 
-                        <p className="text-slate-600 mb-4 text-center md:text-left">
+                        <p
+                          className="mb-4 text-center md:text-left"
+                          style={{ color: "#082c3a" }}
+                        >
                           {assignment.description}
                         </p>
 
-                        <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 md:gap-6 text-sm text-slate-500 mb-4">
+                        <div
+                          className="flex flex-wrap justify-center md:justify-start items-center gap-4 md:gap-6 text-sm"
+                          style={{ color: "#082c3a" }}
+                        >
                           <div className="flex items-center space-x-2">
                             <Calendar size={16} />
                             <span>
@@ -273,13 +330,23 @@ const AssignmentsPage = ({
                     </div>
 
                     <button
-                      className={`flex items-center justify-center space-x-2 px-4 md:px-6 py-3 rounded-lg font-semibold transition-colors mt-4 md:mt-0 w-full md:w-auto ${
-                        assignment.status === "submitted"
-                          ? "bg-green-600 text-white hover:bg-green-700"
-                          : assignment.status === "overdue"
-                          ? "bg-red-600 text-white hover:bg-red-700"
-                          : "bg-blue-600 text-white hover:bg-blue-700"
-                      }`}
+                      className={`flex items-center justify-center space-x-2 px-4 md:px-6 py-3 rounded-lg font-semibold transition-colors mt-4 md:mt-0 w-full md:w-auto`}
+                      style={{
+                        backgroundColor:
+                          assignment.status === "submitted"
+                            ? "#082c3a"
+                            : assignment.status === "overdue"
+                            ? "#f8f5e9"
+                            : "#082c3a",
+                        color:
+                          assignment.status === "overdue"
+                            ? "#082c3a"
+                            : "#f8f5e9",
+                        border:
+                          assignment.status === "overdue"
+                            ? "2px solid #082c3a"
+                            : "none",
+                      }}
                     >
                       <FileText size={18} />
                       <span>
@@ -297,11 +364,17 @@ const AssignmentsPage = ({
 
             {mockAssignments.length === 0 && (
               <div className="text-center py-12">
-                <FileText className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-slate-600 mb-2">
+                <FileText
+                  className="w-16 h-16 mx-auto mb-4"
+                  style={{ color: "#082c3a" }}
+                />
+                <h3
+                  className="text-xl font-semibold mb-2"
+                  style={{ color: "#082c3a" }}
+                >
                   No assignments yet
                 </h3>
-                <p className="text-slate-500">
+                <p style={{ color: "#082c3a" }}>
                   Assignments will appear here once you enroll in courses.
                 </p>
               </div>

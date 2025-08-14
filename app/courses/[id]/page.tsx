@@ -271,31 +271,47 @@ export default function CourseDetail({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
-        <div className="fixed left-0 top-0 h-full w-64 bg-slate-900 text-white shadow-lg z-40 lg:block">
+      <div className="min-h-screen flex" style={{ backgroundColor: "#f8f5e9" }}>
+        <div
+          className="fixed left-0 top-0 h-full w-64 shadow-lg z-40 lg:block"
+          style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
+        >
           <div className="p-6">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-blue-400 mb-0">
-                <Link href="/" className="hover:text-blue-300">
-                  GoCode
+              <h1
+                className="text-2xl font-bold mb-0"
+                style={{ color: "#f8f5e9" }}
+              >
+                <Link href="/" style={{ color: "#f8f5e9" }}>
+                  MasterMore
                 </Link>
               </h1>
             </div>
             <div className="flex items-center space-x-2 mt-8">
-              <div className="w-8 h-8 bg-slate-700 rounded animate-pulse"></div>
+              <div
+                className="w-8 h-8 rounded animate-pulse"
+                style={{ backgroundColor: "#082c3a" }}
+              ></div>
               <div>
-                <div className="w-24 h-4 bg-slate-700 rounded animate-pulse mb-1"></div>
-                <div className="w-16 h-3 bg-slate-800 rounded animate-pulse"></div>
+                <div
+                  className="w-24 h-4 rounded animate-pulse mb-1"
+                  style={{ backgroundColor: "#082c3a" }}
+                ></div>
+                <div
+                  className="w-16 h-3 rounded animate-pulse"
+                  style={{ backgroundColor: "#082c3a" }}
+                ></div>
               </div>
             </div>
           </div>
         </div>
-
         {/* Main Content */}
         <div className="flex-1 lg:ml-64 flex items-center justify-center">
           <div className="text-center space-y-4">
             <LoadingSpinner size="lg" />
-            <p className="text-gray-600 text-lg">Loading course...</p>
+            <p className="text-lg" style={{ color: "#082c3a" }}>
+              Loading course...
+            </p>
           </div>
         </div>
       </div>
@@ -326,12 +342,13 @@ export default function CourseDetail({
     totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen flex" style={{ backgroundColor: "#f8f5e9" }}>
       {/* Course Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full bg-slate-900 text-white shadow-lg transition-all duration-300 z-40 ${
+        className={`fixed left-0 top-0 h-full shadow-lg transition-all duration-300 z-40 ${
           sidebarOpen ? "w-64" : "w-16"
         } lg:block ${sidebarOpen ? "" : "hidden lg:block"}`}
+        style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
       >
         {/* Sidebar Header */}
         <div className="p-6">
@@ -341,15 +358,19 @@ export default function CourseDetail({
             }`}
           >
             {sidebarOpen && (
-              <h1 className="text-2xl font-bold text-blue-400 mb-0">
-                <Link href="/" className="hover:text-blue-300">
-                  GoCode
+              <h1
+                className="text-2xl font-bold mb-0"
+                style={{ color: "#f8f5e9" }}
+              >
+                <Link href="/" style={{ color: "#f8f5e9" }}>
+                  MasterMore
                 </Link>
               </h1>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-slate-800 text-white"
+              className="p-2 rounded-lg"
+              style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
             >
               {sidebarOpen ? (
                 <ArrowLeft className="w-5 h-5" />
@@ -362,10 +383,18 @@ export default function CourseDetail({
             <div className="flex items-center space-x-2 mt-8">
               <span className="text-xl">{course.icon}</span>
               <div>
-                <h2 className="font-semibold text-white truncate text-sm">
+                <h2
+                  className="font-semibold truncate text-sm"
+                  style={{ color: "#f8f5e9" }}
+                >
                   {course.name}
                 </h2>
-                <p className="text-xs text-slate-300">Course Overview</p>
+                <p
+                  className="text-xs"
+                  style={{ color: "#f8f5e9", opacity: 0.7 }}
+                >
+                  Course Overview
+                </p>
               </div>
             </div>
           )}
@@ -374,18 +403,29 @@ export default function CourseDetail({
         {/* Course Progress */}
         {sidebarOpen && (
           <div className="px-6 pb-4">
-            <h3 className="font-semibold text-white mb-2">Course Progress</h3>
+            <h3 className="font-semibold mb-2" style={{ color: "#f8f5e9" }}>
+              Course Progress
+            </h3>
             <div className="mb-2">
-              <div className="flex justify-between text-sm text-slate-300 mb-1">
+              <div
+                className="flex justify-between text-sm mb-1"
+                style={{ color: "#f8f5e9", opacity: 0.7 }}
+              >
                 <span>
                   {completedLessons} of {totalLessons} lessons
                 </span>
                 <span>{Math.round(progressPercentage)}%</span>
               </div>
-              <div className="w-full bg-slate-700 rounded-full h-2">
+              <div
+                className="w-full rounded-full h-2"
+                style={{ backgroundColor: "#f8f5e9" }}
+              >
                 <div
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progressPercentage}%` }}
+                  className="h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${progressPercentage}%`,
+                    backgroundColor: "#082c3a",
+                  }}
                 ></div>
               </div>
             </div>
@@ -510,18 +550,25 @@ export default function CourseDetail({
         } ml-0`}
       >
         {/* Mobile Header */}
-        <div className="lg:hidden bg-white shadow-sm p-4">
+        <div
+          className="lg:hidden shadow-sm p-4"
+          style={{ backgroundColor: "#f8f5e9" }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+                className="p-2 rounded-lg"
+                style={{ backgroundColor: "#f8f5e9", color: "#082c3a" }}
               >
                 <BookOpen className="w-6 h-6" />
               </button>
               <div className="flex items-center space-x-2">
                 <span className="text-xl">{course.icon}</span>
-                <h1 className="text-lg font-semibold text-gray-900 truncate">
+                <h1
+                  className="text-lg font-semibold truncate"
+                  style={{ color: "#082c3a" }}
+                >
                   {course.name}
                 </h1>
               </div>
@@ -530,13 +577,14 @@ export default function CourseDetail({
         </div>
 
         {/* Course Header */}
-        <div className="bg-white shadow-sm">
+        <div className="shadow-sm" style={{ backgroundColor: "#f8f5e9" }}>
           <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-4">
                 <Link
                   href="/?page=courses"
-                  className="text-blue-600 hover:text-blue-800 font-medium"
+                  style={{ color: "#082c3a" }}
+                  className="font-medium"
                 >
                   ← Back to Courses
                 </Link>
@@ -547,12 +595,26 @@ export default function CourseDetail({
               <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <div className="text-4xl">{course.icon}</div>
                 <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+                  <h1
+                    className="text-2xl lg:text-3xl font-bold mt-1"
+                    style={{ color: "#082c3a" }}
+                  >
                     {course.name}
                   </h1>
-                  <p className="text-gray-600 mt-2">{course.description}</p>
-                  <div className="flex flex-wrap items-center gap-2 lg:gap-4 mt-3 text-sm text-gray-500">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  <p
+                    className="mt-2"
+                    style={{ color: "#082c3a", opacity: 0.8 }}
+                  >
+                    {course.description}
+                  </p>
+                  <div
+                    className="flex flex-wrap items-center gap-2 lg:gap-4 mt-3 text-sm"
+                    style={{ color: "#082c3a" }}
+                  >
+                    <span
+                      className="px-2 py-1 rounded"
+                      style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
+                    >
                       {course.difficulty}
                     </span>
                     <span>{course.duration}</span>
@@ -560,28 +622,48 @@ export default function CourseDetail({
                   </div>
                 </div>
               </div>
-
               {!course.isEnrolled ? (
                 <button
                   onClick={handleEnroll}
                   disabled={enrolling}
-                  className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-blue-400 inline-flex items-center justify-center space-x-2"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg font-semibold inline-flex items-center justify-center space-x-2"
+                  style={{
+                    backgroundColor: "#082c3a",
+                    color: "#f8f5e9",
+                    opacity: enrolling ? 0.7 : 1,
+                    cursor: enrolling ? "not-allowed" : "pointer",
+                  }}
                 >
                   {enrolling && <LoadingSpinner size="sm" />}
                   <span>{enrolling ? "Enrolling..." : "Enroll Now"}</span>
                 </button>
               ) : (
                 <div className="text-center lg:text-right">
-                  <div className="text-sm text-gray-600 mb-1">
+                  <div
+                    className="text-sm mb-1"
+                    style={{ color: "#082c3a", opacity: 0.8 }}
+                  >
                     Progress: {completedLessons}/{totalLessons} lessons
                   </div>
-                  <div className="w-full lg:w-32 bg-gray-200 rounded-full h-2">
+                  <div
+                    className="w-full lg:w-32 rounded-full h-2"
+                    style={{
+                      backgroundColor: "#f8f5e9",
+                      border: "1px solid #082c3a",
+                    }}
+                  >
                     <div
-                      className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${progressPercentage}%` }}
+                      className="h-2 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${progressPercentage}%`,
+                        backgroundColor: "#082c3a",
+                      }}
                     ></div>
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">
+                  <div
+                    className="text-sm mt-1"
+                    style={{ color: "#082c3a", opacity: 0.8 }}
+                  >
                     {Math.round(progressPercentage)}% complete
                   </div>
                 </div>
@@ -593,18 +675,30 @@ export default function CourseDetail({
         {/* Course Content */}
         <div className="max-w-7xl mx-auto px-4 py-8">
           {!course.isEnrolled ? (
-            <div className="bg-white rounded-lg shadow p-6 lg:p-8 text-center">
-              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-4">
+            <div
+              className="rounded-lg shadow p-6 lg:p-8 text-center"
+              style={{ backgroundColor: "#f8f5e9" }}
+            >
+              <h2
+                className="text-xl lg:text-2xl font-bold mb-4"
+                style={{ color: "#082c3a" }}
+              >
                 Enroll to Access Lessons
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="mb-6" style={{ color: "#082c3a", opacity: 0.8 }}>
                 Join this course to access all {totalLessons} lessons and start
                 your learning journey.
               </p>
               <button
                 onClick={handleEnroll}
                 disabled={enrolling}
-                className="w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-blue-400"
+                className="w-full sm:w-auto px-8 py-3 rounded-lg font-semibold"
+                style={{
+                  backgroundColor: "#082c3a",
+                  color: "#f8f5e9",
+                  opacity: enrolling ? 0.7 : 1,
+                  cursor: enrolling ? "not-allowed" : "pointer",
+                }}
               >
                 {enrolling ? "Enrolling..." : "Enroll Now"}
               </button>

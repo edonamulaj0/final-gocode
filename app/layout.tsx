@@ -8,7 +8,7 @@ import AuthProvider from "@/components/AuthProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "GoCode - Online Programming Courses",
+  title: "MasterMore - Educational Platform",
   description: "Master programming with progressive learning",
 };
 

@@ -39,8 +39,13 @@ const NavItem = ({
   <button
     onClick={() => changePage(page)}
     className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-colors ${
-      currentPage === page ? "bg-blue-600" : "hover:bg-slate-800"
+      currentPage === page ? "" : ""
     }`}
+    style={{
+      backgroundColor: currentPage === page ? "#082c3a" : "transparent",
+      color: "#f8f5e9",
+      border: currentPage === page ? "2px solid #f8f5e9" : "none",
+    }}
   >
     <Icon size={20} />
     <span>{label}</span>
@@ -62,9 +67,14 @@ const Navbar = ({
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block fixed left-0 top-0 h-full w-64 bg-slate-900 text-white shadow-xl z-10">
+      <div
+        className="hidden lg:block fixed left-0 top-0 h-full w-64 shadow-xl z-10"
+        style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
+      >
         <div className="p-6">
-          <h1 className="text-2xl font-bold text-blue-400 mb-8">GoCode</h1>
+          <h1 className="text-2xl font-bold mb-8" style={{ color: "#f8f5e9" }}>
+            MasterMore
+          </h1>
           <nav className="space-y-4">
             {!session && (
               <NavItem
@@ -101,7 +111,12 @@ const Navbar = ({
             {!session ? (
               <button
                 onClick={() => signIn()}
-                className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-slate-800 transition-colors"
+                className="flex items-center space-x-3 w-full p-3 rounded-lg transition-colors"
+                style={{
+                  backgroundColor: "#082c3a",
+                  color: "#f8f5e9",
+                  border: "2px solid #f8f5e9",
+                }}
               >
                 <UserPlus size={20} />
                 <span>Join Us</span>
@@ -112,7 +127,12 @@ const Navbar = ({
                   signOut();
                   changePage("home");
                 }}
-                className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-slate-800 transition-colors text-red-400"
+                className="flex items-center space-x-3 w-full p-3 rounded-lg transition-colors"
+                style={{
+                  backgroundColor: "#082c3a",
+                  color: "#f8f5e9",
+                  border: "2px solid #f8f5e9",
+                }}
               >
                 <LogOut size={20} />
                 <span>Logout</span>
@@ -123,14 +143,23 @@ const Navbar = ({
 
         {session && (
           <div className="absolute bottom-6 left-6 right-6">
-            <div className="bg-slate-800 rounded-lg p-4">
+            <div
+              className="rounded-lg p-4"
+              style={{ backgroundColor: "#f8f5e9", color: "#082c3a" }}
+            >
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
+                >
                   <User size={20} />
                 </div>
                 <div>
                   <p className="font-medium text-sm">{session.user?.name}</p>
-                  <p className="text-slate-400 text-xs">
+                  <p
+                    className="text-xs"
+                    style={{ color: "#082c3a", opacity: 0.7 }}
+                  >
                     Class {session.user?.class}
                   </p>
                 </div>
@@ -141,14 +170,22 @@ const Navbar = ({
       </div>
 
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-slate-900 text-white shadow-xl z-20">
+      <div
+        className="lg:hidden fixed top-0 left-0 right-0 shadow-xl z-20"
+        style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
+      >
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-bold text-blue-400">GoCode</h1>
+            <h1 className="text-xl font-bold" style={{ color: "#f8f5e9" }}>
+              MasterMore
+            </h1>
             {currentPage !== "home" && currentPage !== "dashboard" && (
               <>
-                <span className="text-slate-400">•</span>
-                <span className="text-lg font-medium text-white capitalize">
+                <span style={{ color: "#f8f5e9", opacity: 0.7 }}>•</span>
+                <span
+                  className="text-lg font-medium capitalize"
+                  style={{ color: "#f8f5e9" }}
+                >
                   {currentPage}
                 </span>
               </>
@@ -156,7 +193,8 @@ const Navbar = ({
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-lg"
+            style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -165,17 +203,23 @@ const Navbar = ({
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 bg-slate-900 text-white z-10 pt-16">
+        <div
+          className="lg:hidden fixed inset-0 z-10 pt-16"
+          style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
+        >
           <div className="p-6">
             <nav className="space-y-4">
               {!session && (
                 <button
                   onClick={() => handleMobileNavClick("home")}
-                  className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                    currentPage === "home"
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "hover:bg-slate-800 text-slate-300 hover:text-white"
-                  }`}
+                  className="flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200"
+                  style={{
+                    backgroundColor:
+                      currentPage === "home" ? "#f8f5e9" : "transparent",
+                    color: currentPage === "home" ? "#082c3a" : "#f8f5e9",
+                    border:
+                      currentPage === "home" ? "2px solid #082c3a" : "none",
+                  }}
                   aria-current={currentPage === "home" ? "page" : undefined}
                   role="menuitem"
                 >
@@ -185,11 +229,14 @@ const Navbar = ({
               )}
               <button
                 onClick={() => handleMobileNavClick("courses")}
-                className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                  currentPage === "courses"
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "hover:bg-slate-800 text-slate-300 hover:text-white"
-                }`}
+                className="flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200"
+                style={{
+                  backgroundColor:
+                    currentPage === "courses" ? "#f8f5e9" : "transparent",
+                  color: currentPage === "courses" ? "#082c3a" : "#f8f5e9",
+                  border:
+                    currentPage === "courses" ? "2px solid #082c3a" : "none",
+                }}
                 aria-current={currentPage === "courses" ? "page" : undefined}
                 role="menuitem"
               >
@@ -198,11 +245,16 @@ const Navbar = ({
               </button>
               <button
                 onClick={() => handleMobileNavClick("assignments")}
-                className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                  currentPage === "assignments"
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "hover:bg-slate-800 text-slate-300 hover:text-white"
-                }`}
+                className="flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200"
+                style={{
+                  backgroundColor:
+                    currentPage === "assignments" ? "#f8f5e9" : "transparent",
+                  color: currentPage === "assignments" ? "#082c3a" : "#f8f5e9",
+                  border:
+                    currentPage === "assignments"
+                      ? "2px solid #082c3a"
+                      : "none",
+                }}
                 aria-current={
                   currentPage === "assignments" ? "page" : undefined
                 }
@@ -214,11 +266,16 @@ const Navbar = ({
               {session && (
                 <button
                   onClick={() => handleMobileNavClick("dashboard")}
-                  className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                    currentPage === "dashboard"
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "hover:bg-slate-800 text-slate-300 hover:text-white"
-                  }`}
+                  className="flex items-center space-x-3 w-full p-3 rounded-lg transition-all duration-200"
+                  style={{
+                    backgroundColor:
+                      currentPage === "dashboard" ? "#f8f5e9" : "transparent",
+                    color: currentPage === "dashboard" ? "#082c3a" : "#f8f5e9",
+                    border:
+                      currentPage === "dashboard"
+                        ? "2px solid #082c3a"
+                        : "none",
+                  }}
                   aria-current={
                     currentPage === "dashboard" ? "page" : undefined
                   }
@@ -234,7 +291,12 @@ const Navbar = ({
                     signIn();
                     setMobileMenuOpen(false);
                   }}
-                  className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-slate-800 transition-colors"
+                  className="flex items-center space-x-3 w-full p-3 rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: "#082c3a",
+                    color: "#f8f5e9",
+                    border: "2px solid #f8f5e9",
+                  }}
                 >
                   <UserPlus size={20} />
                   <span>Join Us</span>
@@ -246,7 +308,12 @@ const Navbar = ({
                     changePage("home");
                     setMobileMenuOpen(false);
                   }}
-                  className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-slate-800 transition-colors text-red-400"
+                  className="flex items-center space-x-3 w-full p-3 rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: "#082c3a",
+                    color: "#f8f5e9",
+                    border: "2px solid #f8f5e9",
+                  }}
                 >
                   <LogOut size={20} />
                   <span>Logout</span>
@@ -254,14 +321,23 @@ const Navbar = ({
               )}
             </nav>
             {session && (
-              <div className="mt-8 bg-slate-800 rounded-lg p-4">
+              <div
+                className="mt-8 rounded-lg p-4"
+                style={{ backgroundColor: "#f8f5e9", color: "#082c3a" }}
+              >
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}
+                  >
                     <User size={20} />
                   </div>
                   <div>
                     <p className="font-medium text-sm">{session.user?.name}</p>
-                    <p className="text-slate-400 text-xs">
+                    <p
+                      className="text-xs"
+                      style={{ color: "#082c3a", opacity: 0.7 }}
+                    >
                       Class {session.user?.class}
                     </p>
                   </div>

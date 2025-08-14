@@ -6,7 +6,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Course } from "@/types/course";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Navbar from "@/components/layout/Navbar";
-import HomePage from "@/components/pages/HomePage";
 import CoursesPage from "@/components/pages/CoursesPage";
 import AssignmentsPage from "@/components/pages/AssignmentsPage";
 import DashboardPage from "@/components/pages/DashboardPage";
@@ -15,7 +14,7 @@ export default function Home() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState("home");
+  const [currentPage, setCurrentPage] = useState("dashboard");
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,10 +36,14 @@ export default function Home() {
     if (pageParam) {
       setCurrentPage(pageParam);
     } else {
-      // If user is logged in, default to dashboard; otherwise home
-      setCurrentPage(session ? "dashboard" : "home");
+      // If user is logged in, default to dashboard; otherwise redirect to login
+      if (session) {
+        setCurrentPage("dashboard");
+      } else {
+        router.push("/auth/signin");
+      }
     }
-  }, [searchParams, session]);
+  }, [searchParams, session, router]);
 
   useEffect(() => {
     fetchCourses();
@@ -50,7 +53,7 @@ export default function Home() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch("/api/admin/courses");
+      const response = await fetch("/api/courses");
       if (response.ok) {
         const data = await response.json();
         setCourses(data);
@@ -67,65 +70,55 @@ export default function Home() {
     }
   };
 
-const enrollInCourse = async (courseId: string) => {
-  try {
-    const response = await fetch(`/api/courses/${courseId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ courseId }),
-    });
+  const enrollInCourse = async (courseId: string) => {
+    try {
+      const response = await fetch(`/api/courses/${courseId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ courseId }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      // Handle specific "already enrolled" case
-      if (
-        response.status === 400 &&
-        data.error === "Already enrolled in this course"
-      ) {
-        // Redirect to course overview page (use plural 'courses')
-        router.push(`/courses/${courseId}`);
-        return {
-          success: true,
-          message: "Redirecting to course...",
-          alreadyEnrolled: true,
-        };
+      if (!response.ok) {
+        // Handle specific "already enrolled" case
+        if (
+          response.status === 400 &&
+          data.error === "Already enrolled in this course"
+        ) {
+          // Redirect to course overview page (use plural 'courses')
+          router.push(`/courses/${courseId}`);
+          return {
+            success: true,
+            message: "Redirecting to course...",
+            alreadyEnrolled: true,
+          };
+        }
+
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
       }
 
-      throw new Error(data.error || `HTTP error! status: ${response.status}`);
+      // Handle successful enrollment
+      console.log("Enrollment successful:", data);
+      // Also redirect to course page after successful enrollment (use plural 'courses')
+      router.push(`/courses/${courseId}`);
+      return {
+        success: true,
+        data,
+        message: "Successfully enrolled in course",
+      };
+    } catch (error) {
+      console.error("Failed to enroll:", error);
+      throw error;
     }
-
-    // Handle successful enrollment
-    console.log("Enrollment successful:", data);
-    // Also redirect to course page after successful enrollment (use plural 'courses')
-    router.push(`/courses/${courseId}`);
-    return { success: true, data, message: "Successfully enrolled in course" };
-  } catch (error) {
-    console.error("Failed to enroll:", error);
-    throw error;
-  }
-};
-  
+  };
 
   const renderCurrentPage = () => {
-    // If user is logged in and tries to access home, redirect to dashboard
-    if (session && currentPage === "home") {
-      return <DashboardPage courses={courses} session={session} />;
-    }
-
     switch (currentPage) {
-      case "home":
-        return (
-          <HomePage
-            courses={courses}
-            loading={loading}
-            error={error}
-            changePage={changePage}
-            fetchCourses={fetchCourses}
-          />
-        );
+      case "dashboard":
+        return <DashboardPage courses={courses} session={session} />;
       case "courses":
         return (
           <CoursesPage
@@ -147,21 +140,8 @@ const enrollInCourse = async (courseId: string) => {
             fetchCourses={fetchCourses}
           />
         );
-      case "dashboard":
-        return <DashboardPage courses={courses} session={session} />;
       default:
-        // Default behavior: show dashboard for logged-in users, home for guests
-        return session ? (
-          <DashboardPage courses={courses} session={session} />
-        ) : (
-          <HomePage
-            courses={courses}
-            loading={loading}
-            error={error}
-            changePage={changePage}
-            fetchCourses={fetchCourses}
-          />
-        );
+        return <DashboardPage courses={courses} session={session} />;
     }
   };
 
@@ -179,7 +159,7 @@ const enrollInCourse = async (courseId: string) => {
           <div className="max-w-6xl mx-auto flex items-center justify-center py-20 overflow-x-hidden">
             <div className="text-center space-y-4">
               <LoadingSpinner size="lg" />
-              <p className="text-slate-600 text-lg">Loading GoCode...</p>
+              <p className="text-slate-600 text-lg">Loading MasterMore...</p>
             </div>
           </div>
         </main>

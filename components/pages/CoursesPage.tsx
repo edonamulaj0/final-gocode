@@ -30,13 +30,13 @@ const CoursesPage = ({
   const router = useRouter();
 
   return (
-    <div>
+    <div style={{ backgroundColor: "#f8f5e9", minHeight: "100vh" }}>
       {/* Courses Header */}
-      <div className="bg-white shadow-sm">
+      <div className="shadow-sm" style={{ backgroundColor: "#f8f5e9" }}>
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4 invisible">
-              <span className="text-blue-600 hover:text-blue-800 font-medium">
+              <span style={{ color: "#082c3a" }} className="font-medium">
                 ← Back to Courses
               </span>
             </div>
@@ -45,15 +45,15 @@ const CoursesPage = ({
           <div className="flex items-center space-x-4">
             <div className="text-4xl">📚</div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+              <h1 className="text-2xl lg:text-3xl font-bold" style={{ color: "#082c3a" }}>
                 Programming Courses
               </h1>
-              <p className="text-gray-600 mt-2">
+              <p className="mt-2" style={{ color: "#082c3a" }}>
                 Master programming languages step by step. Complete each course
                 to unlock the next one.
               </p>
-              <div className="flex flex-wrap items-center gap-2 lg:gap-4 mt-3 text-sm text-gray-500">
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+              <div className="flex flex-wrap items-center gap-2 lg:gap-4 mt-3 text-sm" style={{ color: "#082c3a" }}>
+                <span className="px-2 py-1 rounded" style={{ backgroundColor: "#082c3a", color: "#f8f5e9" }}>
                   {courses.length} Courses Available
                 </span>
                 <span>Beginner to Advanced</span>
@@ -78,11 +78,15 @@ const CoursesPage = ({
               return (
                 <div
                   key={course.id}
-                  className={`bg-white rounded-xl shadow-md p-4 md:p-8 border-2 ${
+                  className={`rounded-xl shadow-md p-4 md:p-8 border-2 ${
                     isUnlocked
-                      ? "border-slate-200"
-                      : "border-slate-100 opacity-60"
+                      ? ""
+                      : "opacity-60"
                   }`}
+                  style={{
+                    backgroundColor: "#f8f5e9",
+                    borderColor: "#082c3a"
+                  }}
                 >
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                     <div className="flex flex-col md:flex-row md:items-start space-y-4 md:space-y-0 md:space-x-6 flex-1">
@@ -91,20 +95,20 @@ const CoursesPage = ({
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-center md:justify-start space-x-3 mb-3">
-                          <h2 className="text-xl md:text-2xl font-bold text-slate-800">
+                          <h2 className="text-xl md:text-2xl font-bold" style={{ color: "#082c3a" }}>
                             {course.name}
                           </h2>
                           {!isUnlocked && (
-                            <Lock className="text-slate-900" size={20} />
+                            <Lock style={{ color: "#082c3a" }} size={20} />
                           )}
                           {course.isCompleted && (
-                            <CheckCircle className="text-green-500" size={20} />
+                            <CheckCircle style={{ color: "#082c3a" }} size={20} />
                           )}
                         </div>
-                        <p className="text-slate-600 mb-4 text-center md:text-left">
+                        <p className="mb-4 text-center md:text-left" style={{ color: "#082c3a" }}>
                           {course.description}
                         </p>
-                        <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 md:gap-6 text-sm text-slate-500 mb-4">
+                        <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 md:gap-6 text-sm mb-4" style={{ color: "#082c3a" }}>
                           <div className="flex items-center space-x-2">
                             <Clock size={16} />
                             <span>{course.duration}</span>
@@ -120,14 +124,14 @@ const CoursesPage = ({
                         </div>
                         {session && progress > 0 && (
                           <div className="mb-4">
-                            <div className="flex justify-between text-sm text-slate-600 mb-1">
+                            <div className="flex justify-between text-sm mb-1" style={{ color: "#082c3a" }}>
                               <span>Progress</span>
                               <span>{progress}%</span>
                             </div>
-                            <div className="w-full bg-slate-200 rounded-full h-2">
+                            <div className="w-full rounded-full h-2" style={{ backgroundColor: "#f8f5e9", border: "1px solid #082c3a" }}>
                               <div
-                                className="bg-blue-600 h-2 rounded-full transition-all"
-                                style={{ width: `${progress}%` }}
+                                className="h-2 rounded-full transition-all"
+                                style={{ width: `${progress}%`, backgroundColor: "#082c3a" }}
                               ></div>
                             </div>
                           </div>
@@ -153,11 +157,14 @@ const CoursesPage = ({
                           router.push(`/courses/${course.id}`);
                         }
                       }}
-                      className={`flex items-center justify-center space-x-2 px-4 md:px-6 py-3 rounded-lg font-semibold transition-colors mt-4 md:mt-0 w-full md:w-auto ${
-                        isUnlocked && session
-                          ? "bg-blue-600 text-white hover:bg-blue-700"
-                          : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                      }`}
+                      className={`flex items-center justify-center space-x-2 px-4 md:px-6 py-3 rounded-lg font-semibold transition-colors mt-4 md:mt-0 w-full md:w-auto`}
+                      style={{
+                        backgroundColor: isUnlocked && session ? "#082c3a" : "#f8f5e9",
+                        color: isUnlocked && session ? "#f8f5e9" : "#082c3a",
+                        border: `2px solid #082c3a`,
+                        opacity: isUnlocked && session ? 1 : 0.6,
+                        cursor: isUnlocked && session ? "pointer" : "not-allowed"
+                      }}
                     >
                       <Play size={18} />
                       <span>

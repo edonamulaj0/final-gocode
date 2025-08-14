@@ -59,13 +59,21 @@ export default function SignIn() {
 
   return (
     // Main container using the light-themed styles from the previous design.
-    <div className="flex items-center justify-center min-h-screen p-4 bg-white text-[#171717]">
+    <div
+      className="flex items-center justify-center min-h-screen p-4"
+      style={{ background: "var(--background)", color: "#082c3a" }}
+    >
       {/* Sign-in card container */}
-      <div className="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg border border-gray-200">
+      <div
+        className="w-full max-w-sm p-8 space-y-6 rounded-xl shadow-lg border border-gray-200"
+        style={{ background: "var(--foreground)" }}
+      >
         {/* Heading section */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Sign in to your account</h1>
-          <p className="mt-2 text-sm text-gray-500">
+          <h1 className="text-3xl font-bold" style={{ color: "#082c3a" }}>
+            Sign in to your account
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: "#2563eb" }}>
             Welcome back! Please enter your details.
           </p>
         </div>

@@ -29,21 +29,33 @@ const HomePage = ({
 }: HomePageProps) => (
   <div className="space-y-8">
     {/* Home Header */}
-    <div className="bg-white shadow-sm">
+    <div className="shadow-sm" style={{ backgroundColor: "#f8f5e9" }}>
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
         <div className="flex flex-col space-y-6">
           <div>
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+            <h1
+              className="text-3xl lg:text-4xl font-bold mb-4"
+              style={{ color: "#082c3a" }}
+            >
               Master Programming with{" "}
-              <span className="text-blue-600">GoCode</span>
+              <span style={{ color: "#082c3a" }}>MasterMore</span>
             </h1>
-            <p className="text-gray-600 text-lg mb-6">
+            <p className="text-lg mb-6" style={{ color: "#082c3a" }}>
               Progressive learning platform designed for students. Unlock
               courses step by step, practice with real problems, and track your
               journey to becoming a skilled developer.
             </p>
-            <div className="flex flex-wrap items-center gap-3 lg:gap-6 mb-6 text-sm text-gray-500">
-              <span className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg">
+            <div
+              className="flex flex-wrap items-center gap-3 lg:gap-6 mb-6 text-sm"
+              style={{ color: "#082c3a" }}
+            >
+              <span
+                className="px-3 py-2 rounded-lg"
+                style={{
+                  backgroundColor: "#082c3a",
+                  color: "#f8f5e9",
+                }}
+              >
                 Progressive Learning
               </span>
               <span>Student-Focused</span>
@@ -52,7 +64,11 @@ const HomePage = ({
             <div>
               <button
                 onClick={() => changePage("courses")}
-                className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center space-x-3"
+                className="px-8 py-4 rounded-lg text-lg font-semibold transition-colors inline-flex items-center space-x-3"
+                style={{
+                  backgroundColor: "#082c3a",
+                  color: "#f8f5e9",
+                }}
               >
                 <span>Start Learning</span>
                 <ArrowRight size={24} />
@@ -65,42 +81,66 @@ const HomePage = ({
 
     {/* About Section */}
     <section className="mx-4 md:mx-8 overflow-x-hidden">
-      <div className="bg-slate-50 rounded-2xl p-6 md:p-12 max-w-6xl mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-8 text-center">
-          Why Choose GoCode?
+      <div
+        className="rounded-2xl p-6 md:p-12 max-w-6xl mx-auto"
+        style={{ backgroundColor: "#f8f5e9" }}
+      >
+        <h2
+          className="text-2xl md:text-3xl font-bold mb-8 text-center"
+          style={{ color: "#082c3a" }}
+        >
+          Why Choose MasterMore?
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
           <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Target className="text-blue-600" size={32} />
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{ backgroundColor: "#f8f5e9" }}
+            >
+              <Target style={{ color: "#082c3a" }} size={32} />
             </div>
-            <h3 className="text-xl text-slate-600 font-semibold mb-3">
+            <h3
+              className="text-xl font-semibold mb-3"
+              style={{ color: "#082c3a" }}
+            >
               Progressive Learning
             </h3>
-            <p className="text-slate-600">
+            <p style={{ color: "#082c3a" }}>
               Unlock courses sequentially to build strong foundations before
               advancing.
             </p>
           </div>
           <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Code className="text-blue-600" size={32} />
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{ backgroundColor: "#f8f5e9" }}
+            >
+              <Code style={{ color: "#082c3a" }} size={32} />
             </div>
-            <h3 className="text-xl text-slate-600  font-semibold mb-3">
+            <h3
+              className="text-xl font-semibold mb-3"
+              style={{ color: "#082c3a" }}
+            >
               Hands-on Practice
             </h3>
-            <p className="text-slate-600">
+            <p style={{ color: "#082c3a" }}>
               Reinforce learning with practical coding challenges and projects.
             </p>
           </div>
           <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <BarChart3 className="text-blue-600" size={32} />
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{ backgroundColor: "#f8f5e9" }}
+            >
+              <BarChart3 style={{ color: "#082c3a" }} size={32} />
             </div>
-            <h3 className="text-xl text-slate-600 font-semibold mb-3">
+            <h3
+              className="text-xl font-semibold mb-3"
+              style={{ color: "#082c3a" }}
+            >
               Track Progress
             </h3>
-            <p className="text-slate-600">
+            <p style={{ color: "#082c3a" }}>
               Monitor your learning journey with detailed progress analytics.
             </p>
           </div>
@@ -111,7 +151,10 @@ const HomePage = ({
     {/* Courses Preview */}
     <section className="px-4 md:px-8">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-8 text-center">
+        <h2
+          className="text-2xl md:text-3xl font-bold mb-8 text-center"
+          style={{ color: "#082c3a" }}
+        >
           Our Courses
         </h2>
         {loading ? (
@@ -123,16 +166,23 @@ const HomePage = ({
             {courses.map((course) => (
               <div
                 key={course.id}
-                className="bg-white rounded-xl shadow-md p-6 border border-slate-200"
+                className="rounded-xl shadow-md p-6 border"
+                style={{
+                  backgroundColor: "#f8f5e9",
+                  borderColor: "#082c3a",
+                }}
               >
                 <div className="text-4xl mb-4">{course.icon}</div>
-                <h3 className="text-xl text-slate-600 font-semibold mb-2">
+                <h3
+                  className="text-xl font-semibold mb-2"
+                  style={{ color: "#082c3a" }}
+                >
                   {course.name}
                 </h3>
-                <p className="text-slate-600 text-sm mb-4">
+                <p className="text-sm mb-4" style={{ color: "#082c3a" }}>
                   {course.description.substring(0, 80)}...
                 </p>
-                <div className="space-y-2 text-sm text-slate-500">
+                <div className="space-y-2 text-sm" style={{ color: "#082c3a" }}>
                   <div className="flex items-center space-x-2">
                     <Clock size={14} />
                     <span>{course.duration}</span>
@@ -151,37 +201,57 @@ const HomePage = ({
 
     {/* Pricing */}
     <section className="mx-4 md:mx-8 overflow-x-hidden mb-16">
-      <div className="bg-slate-800 text-white rounded-2xl p-6 md:p-12 text-center max-w-6xl mx-auto">
+      <div
+        className="rounded-2xl p-6 md:p-12 text-center max-w-6xl mx-auto"
+        style={{
+          backgroundColor: "#082c3a",
+          color: "#f8f5e9",
+        }}
+      >
         <h2 className="text-2xl md:text-3xl font-bold mb-4">
           Simple, Student-Friendly Pricing
         </h2>
-        <p className="text-slate-300 mb-8">
+        <p className="mb-8" style={{ color: "#f8f5e9", opacity: 0.8 }}>
           Full access to all courses and features
         </p>
-        <div className="bg-slate-700 rounded-xl p-6 md:p-8 max-w-md mx-auto">
+        <div
+          className="rounded-xl p-6 md:p-8 max-w-md mx-auto"
+          style={{
+            backgroundColor: "#f8f5e9",
+            color: "#082c3a",
+          }}
+        >
           <div className="text-3xl md:text-4xl font-bold mb-2">
             $29<span className="text-lg">/month</span>
           </div>
-          <p className="text-slate-300 mb-6">Per student</p>
+          <p className="mb-6" style={{ color: "#082c3a", opacity: 0.8 }}>
+            Per student
+          </p>
           <ul className="space-y-3 text-left mb-8">
             <li className="flex items-center space-x-2">
-              <CheckCircle size={16} className="text-green-400" />
+              <CheckCircle size={16} style={{ color: "#082c3a" }} />
               <span>Access to all courses</span>
             </li>
             <li className="flex items-center space-x-2">
-              <CheckCircle size={16} className="text-green-400" />
+              <CheckCircle size={16} style={{ color: "#082c3a" }} />
               <span>Unlimited practice problems</span>
             </li>
             <li className="flex items-center space-x-2">
-              <CheckCircle size={16} className="text-green-400" />
+              <CheckCircle size={16} style={{ color: "#082c3a" }} />
               <span>Progress tracking</span>
             </li>
             <li className="flex items-center space-x-2">
-              <CheckCircle size={16} className="text-green-400" />
+              <CheckCircle size={16} style={{ color: "#082c3a" }} />
               <span>Student dashboard</span>
             </li>
           </ul>
-          <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+          <button
+            className="w-full py-3 rounded-lg font-semibold transition-colors"
+            style={{
+              backgroundColor: "#082c3a",
+              color: "#f8f5e9",
+            }}
+          >
             Get Started
           </button>
         </div>
